@@ -631,26 +631,31 @@ jsplayer.$コメント_投稿 = function(){
 
     this.$コメント入力.value = "";
 
-    if((!this.args.himado || !this.args.group_id) && !this.args.posturl){
-        return;
+    if(this.args.himado && this.args.group_id){
+        var group_id = String(this.args.group_id).split(',')[0];
+        var param    = {
+            mode     : "comment",
+            id       : this.args.himado,
+            vpos     : 時間.toFixed(2) * 100,
+            comment  : 本文,
+            mail     : '',
+            group_id : group_id,
+            adddate  : Math.floor(Date.now()/1000),
+        };
+        var url   = 'http://himado.in/api/player?' + jsplayer.ajax.param(param);
+        var proxy = "http://127.0.0.1/jsplayer/proxy.php?" + jsplayer.ajax.param({url: url});
+
+        jsplayer.ajax({url: proxy});
     }
-
-    var group_id = String(this.args.group_id).split(',')[0];
-    var url      = this.args.posturl || 'http://himado.in/api/player';
-    var param    = jsplayer.ajax.param({
-        mode     : "comment",
-        id       : this.args.himado,
-        vpos     : 時間.toFixed(2) * 100,
-        comment  : 本文,
-        mail     : '',
-        group_id : group_id,
-        adddate  : Math.floor(Date.now()/1000),
-        file     : this.$動画.src,
-    });
-
-    var proxy = "http://127.0.0.1/jsplayer/proxy.php?" + jsplayer.ajax.param({url: url + '?' + param});
-
-    jsplayer.ajax({url: proxy});
+    else if(this.args.posturl){
+        var param = {
+            mode    : "comment",
+            vpos    : 時間.toFixed(2) * 100,
+            comment : 本文,
+            file    : this.$動画.src,
+        };
+        jsplayer.ajax({url: this.args.posturl, body: param, method:'POST'});
+    }
 };
 
 
