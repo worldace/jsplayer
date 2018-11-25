@@ -65,9 +65,6 @@ jsplayer.描画 = function($){
 
     var 時間 = jsplayer.ポインタ位置計算($.$動画.currentTime/$.$動画.duration, $.$時間調節ポインタ);
     $.$時間調節ポインタ.style.left = 時間.位置 + "px";
-
-    var 音量 = jsplayer.ポインタ位置計算($.$動画.volume, $.$音量調節ポインタ);
-    $.$音量調節ポインタ.style.left = 音量.位置 + "px";
 };
 
 
@@ -364,7 +361,7 @@ jsplayer.$動画_onloadedmetadata = function(event){
     this.$コメント入力.disabled       = false;
     this.$コメント投稿ボタン.disabled = false;
 
-    this.$動画.volume = jsplayer.ユーザ設定.音量;
+    this.$動画.音量(jsplayer.ユーザ設定.音量);
 };
 
 
@@ -437,7 +434,8 @@ jsplayer.$動画_onvolumechange = function(event){
         this.$音量ボタン.removeAttribute("data-mute");
         jsplayer.ユーザ設定.音量 = this.$動画.volume;
     }
-    jsplayer.描画(this);
+    var ポインタ = jsplayer.ポインタ位置計算(this.$動画.volume, this.$音量調節ポインタ);
+    this.$音量調節ポインタ.style.left = ポインタ.位置 + "px";console.log(ポインタ.位置);
 };
 
 
@@ -1208,6 +1206,10 @@ jsplayer.CSS = (function() {/*
     background-image: linear-gradient(to bottom, #ccc, #aaa);
     border: solid 1px #999;
     border-radius: 3px;
+}
+
+.jsplayer-音量調節ポインタ{
+    left: calc(100% - 10px);
 }
 
 .jsplayer-フォーム枠{
