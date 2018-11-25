@@ -59,16 +59,6 @@ jsplayer.初回描画 = function ($){
 
 
 
-jsplayer.描画 = function($){
-    $.$現在時間.textContent = jsplayer.時間整形($.$動画.currentTime);
-    $.$合計時間.textContent = jsplayer.時間整形($.$動画.duration);
-
-    var 時間 = jsplayer.ポインタ位置計算($.$動画.currentTime/$.$動画.duration, $.$時間調節ポインタ);
-    $.$時間調節ポインタ.style.left = 時間.位置 + "px";
-};
-
-
-
 jsplayer.時間整形 = function(時間){
     時間 = 時間 || 0;
 
@@ -361,6 +351,7 @@ jsplayer.$動画_onloadedmetadata = function(event){
     this.$コメント入力.disabled       = false;
     this.$コメント投稿ボタン.disabled = false;
 
+    this.$合計時間.textContent = jsplayer.時間整形(this.$動画.duration);
     this.$動画.音量(jsplayer.ユーザ設定.音量);
 };
 
@@ -380,7 +371,11 @@ jsplayer.$動画_ontimeupdate = function(event){
     this.前回の現在時間 = 秒;
 
     if(!this.$時間調節ポインタ.ドラッグ中){
-        jsplayer.描画(this);
+        this.$現在時間.textContent = jsplayer.時間整形(this.$動画.currentTime);
+        this.$合計時間.textContent = jsplayer.時間整形(this.$動画.duration);
+
+        var 時間 = jsplayer.ポインタ位置計算(this.$動画.currentTime/this.$動画.duration, this.$時間調節ポインタ);
+        this.$時間調節ポインタ.style.left = 時間.位置 + "px";
     }
     if(Array.isArray(this.コメント[秒])  &&  this.$動画.paused === false  &&  !this.$コメント表示ボタン.hasAttribute("data-off")){
         this.$コメント.放流(this.コメント[秒]);
@@ -585,7 +580,7 @@ jsplayer.$コメント_取得 = function(){
         return;
     }
 
-    var himado_url = "http://himado.in/?" + jsplayer.ajax.param({
+    var url = "http://himado.in/?" + jsplayer.ajax.param({
         mode     : "comment",
         format   : "nico",
         limit    : 10000,
@@ -595,9 +590,9 @@ jsplayer.$コメント_取得 = function(){
         nocache  : Date.now()
     });
 
-    var proxy_url = "http://127.0.0.1/jsplayer/proxy.php?" + jsplayer.ajax.param({url: himado_url});
+    var proxy = "http://127.0.0.1/jsplayer/proxy.php?" + jsplayer.ajax.param({url: url});
 
-    jsplayer.ajax({url: proxy_url, ok: this.$コメント.取得成功, mime:'text/xml'});
+    jsplayer.ajax({url: proxy, ok: this.$コメント.取得成功, mime:'text/xml'});
 };
 
 
@@ -617,6 +612,45 @@ jsplayer.$コメント_取得成功 = function(xhr){
             this.コメント[番号].push([本文.substring(0,64), vpos]);
         }
     }
+};
+
+
+
+jsplayer.$コメント_投稿 = function(){
+    var 時間 = this.$動画.currentTime;
+    var 秒   = Math.floor(時間);
+    var 本文 = this.$コメント入力.value.trim();
+
+    if(本文 === "" || 本文.length > 64){
+        return;
+    }
+
+    if(Array.isArray(this.コメント[秒+1])){
+        this.コメント[秒+1].unshift([本文, 時間+1]);
+    }
+
+    this.$コメント入力.value = "";
+
+    if((!this.args.himado || !this.args.group_id) && !this.args.posturl){
+        return;
+    }
+
+    var group_id = String(this.args.group_id).split(',')[0];
+    var url      = this.args.posturl || 'http://himado.in/api/player';
+    var param    = jsplayer.ajax.param({
+        mode     : "comment",
+        id       : this.args.himado,
+        vpos     : 時間.toFixed(2) * 100,
+        comment  : 本文,
+        mail     : '',
+        group_id : group_id,
+        adddate  : Math.floor(Date.now()/1000),
+        file     : this.$動画.src,
+    });
+
+    var proxy = "http://127.0.0.1/jsplayer/proxy.php?" + jsplayer.ajax.param({url: url + '?' + param});
+
+    jsplayer.ajax({url: proxy});
 };
 
 
@@ -791,7 +825,7 @@ jsplayer.$全画面ボタン_onclick = function(event){
 
 jsplayer.$フォーム枠_onsubmit = function(event){
     event.preventDefault();
-    ////$v.comment.post();
+    this.$コメント.投稿();
     this.$動画.play();
     this.$画面.focus();
 };
