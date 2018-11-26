@@ -22,15 +22,10 @@ jsplayer.セットアップ = function (){
     jsplayer.ユーザ設定      = jsplayer.loadLocalStorage("jsplayer");
     jsplayer.ユーザ設定.音量 = Number(jsplayer.ユーザ設定.音量 || 1);
 
-    //イベント登録
     window.addEventListener('unload', function(event){
         jsplayer.saveLocalStorage("jsplayer", jsplayer.ユーザ設定);
     });
 
-    if     (document.fullscreenEnabled)      { document.addEventListener("fullscreenchange",       jsplayer.全画面); }
-    else if(document.msFullscreenEnabled)    { document.addEventListener("MSFullscreenChange",     jsplayer.全画面); }
-    else if(document.webkitFullscreenEnabled){ document.addEventListener("webkitfullscreenchange", jsplayer.全画面); }
-    else if(document.mozFullScreenEnabled)   { document.addEventListener("mozfullscreenchange",    jsplayer.全画面); }
 
     //ブラウザバグ対策
     if(navigator.userAgent.indexOf('Edge/') >= 0){ //Edge(Fall Creators)でコメントが表示されないバグ対策
@@ -49,6 +44,11 @@ jsplayer.セットアップ = function (){
 
 
 jsplayer.初回描画 = function ($, el){
+    if     (document.fullscreenEnabled)      { document.addEventListener("fullscreenchange",       $.$全画面.イベント); }
+    else if(document.msFullscreenEnabled)    { document.addEventListener("MSFullscreenChange",     $.$全画面.イベント); }
+    else if(document.webkitFullscreenEnabled){ document.addEventListener("webkitfullscreenchange", $.$全画面.イベント); }
+    else if(document.mozFullScreenEnabled)   { document.addEventListener("mozfullscreenchange",    $.$全画面.イベント); }
+
     el.parentNode.replaceChild($.$jsplayer, el);
 
     //サイズキャッシュ
@@ -146,117 +146,6 @@ jsplayer.キーフレーム追加 = function(名前, 画面横幅){
 
 
 
-jsplayer.全画面 = function(event){
-    var 全画面 = document.fullscreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
-    if(全画面){
-        if(全画面.classList[0] !== 'jsplayer-画面'){
-            return;
-        }
-        jsplayer.全画面.開始.call(全画面.parentNode.$);
-        jsplayer.全画面.要素 = 全画面;
-    }
-    else if(jsplayer.全画面.要素){
-        jsplayer.全画面.終了.call(jsplayer.全画面.要素.parentNode.$);
-        jsplayer.全画面.要素 = null;
-    }
-};
-
-
-
-jsplayer.全画面.開始 = function(){
-    this.$画面.onmousedown  = jsplayer.全画面.コントローラ表示切り替え.bind(this);
-    this.$画面.onmousemove  = jsplayer.全画面.マウスタイマ.bind(this);
-    this.$画面.style.cursor = "none";
-
-    this.$画面.appendChild(this.$コントローラ);
-    this.$コントローラ.style.visibility = "hidden";
-
-    var 画面 = this.$画面.getBoundingClientRect();
-    if(navigator.userAgent.indexOf('Trident/') >= 0 || navigator.userAgent.indexOf('Edge/') >= 0){ //IEとEdge フルスクリーン時にwidth, heightが取得できない時がある？
-        画面 = {width: window.screen.width, height: window.screen.height};
-    }
-
-    jsplayer.キーフレーム追加('jsplayer-fullscreen-lane', 画面.width);
-
-    this.コメント設定 = jsplayer.コメント設定(画面.height);
-    this.$画面.コメント全消去();
-    this.$画面.focus();
-};
-
-
-
-jsplayer.全画面.終了 = function(){
-    this.$画面.onmousedown = null;
-    this.$画面.onmousemove = null;
-    if(this.$画面.マウスタイマ番号){
-        window.clearTimeout(this.$画面.マウスタイマ番号);
-    }
-    this.$画面.style.cursor = "auto";
-
-    this.$jsplayer.appendChild(this.$コントローラ);
-    this.$コントローラ.style.visibility = "visible";
-
-    var 画面 = this.$画面.getBoundingClientRect();
-
-    this.コメント設定 = jsplayer.コメント設定(画面.height);
-    this.$画面.コメント全消去();
-    this.$画面.focus();
-};
-
-
-
-jsplayer.全画面.コントローラ表示切り替え = function(event){
-    if(this.$コントローラ.style.visibility === "hidden"){
-        this.$コントローラ.style.visibility = "visible";
-    }
-    else{
-        if(this.$コントローラ.contains(event.target)){
-            return;
-        }
-        this.$コントローラ.style.visibility = "hidden";
-    }
-};
-
-
-
-jsplayer.全画面.マウスタイマ = function(event){
-    this.$画面.style.cursor = "auto";
-    if(this.$画面.マウスタイマ番号){
-        window.clearTimeout(this.$画面.マウスタイマ番号);
-    }
-    this.$画面.マウスタイマ番号 = window.setTimeout(timeout, 2500, this);
-
-    function timeout($){
-        $.$画面.style.cursor = "none";
-    }
-};
-
-
-
-jsplayer.全画面.なら = function($画面){
-    var 全画面 = document.fullscreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
-    return 全画面 === $画面;
-};
-
-
-
-jsplayer.全画面.切り替え = function($画面){
-    if(jsplayer.全画面.なら($画面)){
-        if     (document.exitFullscreen)      { document.exitFullscreen(); }
-        else if(document.msExitFullscreen)    { document.msExitFullscreen(); }
-        else if(document.webkitExitFullscreen){ document.webkitExitFullscreen(); }
-        else if(document.mozCancelFullScreen) { document.mozCancelFullScreen(); }
-    }
-    else{
-        if     ($画面.requestFullscreen)      { $画面.requestFullscreen(); }
-        else if($画面.msRequestFullscreen)    { $画面.msRequestFullscreen(); }
-        else if($画面.webkitRequestFullscreen){ $画面.webkitRequestFullscreen(); }
-        else if($画面.mozRequestFullScreen)   { $画面.mozRequestFullScreen(); }
-    }
-};
-
-
-
 jsplayer.$jsplayer_onkeydown = function(event){
     this.$コントローラ.style.visibility = "visible";
     if(event.target.tagName === 'INPUT'){
@@ -267,7 +156,7 @@ jsplayer.$jsplayer_onkeydown = function(event){
         this.$コメント入力.focus();
     }
     else if(event.which == 13 && event.ctrlKey){ //Ctrl+Enter ※IEで効かない
-        this.$画面.全画面切り替え();
+        this.$全画面.切り替え();
     }
     else if(event.which == 13){ //Enter
         (this.$動画.paused)  ?  this.$動画.play()  :  this.$動画.pause();
@@ -479,7 +368,7 @@ jsplayer.$コメント_DOM作成 = function(data, レーン番号){
     el.laneNumber           = レーン番号;
     el.style.top            = レーン番号 * this.コメント設定.レーン高さ + this.コメント設定.マージン + "px";
     el.style.fontSize       = this.コメント設定.フォント + "px";
-    el.style.animationName  = jsplayer.全画面.なら(this.$画面) ? "jsplayer-fullscreen-lane" : "jsplayer-normal-lane";
+    el.style.animationName  = this.$全画面.なら() ? "jsplayer-fullscreen-lane" : "jsplayer-normal-lane";
     el.style.animationDelay = jsplayer.コメント遅延計算(data[1], this.$動画.currentTime);
 
     return el;
@@ -655,7 +544,7 @@ jsplayer.$コメント_投稿 = function(){
 
         jsplayer.ajax({url: proxy});
     }
-    else if(this.args.posturl){
+    if(this.args.posturl){
         var param = {
             mode    : "comment",
             vpos    : 時間.toFixed(2) * 100,
@@ -699,6 +588,117 @@ jsplayer.$画面_OSD消去 = function(){
 jsplayer.$画面_onanimationend = function (event){
     if(event.target.classList[0] === 'jsplayer-コメント'){
         this.$画面.removeChild(event.target);
+    }
+};
+
+
+
+jsplayer.$全画面_イベント = function(event){
+    var 全画面 = document.fullscreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+    if(全画面){
+        if(this.$画面 !== 全画面){
+            return;
+        }
+        this.$全画面.開始();
+        this.全画面 = this.$画面;
+    }
+    else if(this.$画面 === this.全画面){
+        this.$全画面.終了();
+        this.全画面 = null;
+    }
+};
+
+
+
+jsplayer.$全画面_開始 = function($画面){
+    this.$画面.onmousedown  = this.$全画面.コントローラ表示切り替え;
+    this.$画面.onmousemove  = this.$全画面.マウスタイマ;
+    this.$画面.style.cursor = "none";
+
+    this.$画面.appendChild(this.$コントローラ);
+    this.$コントローラ.style.visibility = "hidden";
+
+    var 画面 = this.$画面.getBoundingClientRect();
+    if(navigator.userAgent.indexOf('Trident/') >= 0 || navigator.userAgent.indexOf('Edge/') >= 0){ //IEとEdge フルスクリーン時にwidth, heightが取得できない時がある？
+        画面 = {width: window.screen.width, height: window.screen.height};
+    }
+
+    jsplayer.キーフレーム追加('jsplayer-fullscreen-lane', 画面.width);
+
+    this.コメント設定 = jsplayer.コメント設定(画面.height);
+    this.$コメント.全消去();
+    this.$画面.focus();
+};
+
+
+
+jsplayer.$全画面_終了 = function(){
+    this.$画面.onmousedown = null;
+    this.$画面.onmousemove = null;
+    if(this.$画面.マウスタイマ番号){
+        window.clearTimeout(this.$画面.マウスタイマ番号);
+    }
+    this.$画面.style.cursor = "auto";
+
+    this.$jsplayer.appendChild(this.$コントローラ);
+    this.$コントローラ.style.visibility = "visible";
+
+    var 画面 = this.$画面.getBoundingClientRect();
+
+    this.コメント設定 = jsplayer.コメント設定(画面.height);
+    this.$コメント.全消去();
+    this.$画面.focus();
+};
+
+
+
+jsplayer.$全画面_コントローラ表示切り替え = function(event){
+    if(this.$コントローラ.style.visibility === "hidden"){
+        this.$コントローラ.style.visibility = "visible";
+    }
+    else{
+        if(this.$コントローラ.contains(event.target)){
+            return;
+        }
+        this.$コントローラ.style.visibility = "hidden";
+    }
+};
+
+
+
+jsplayer.$全画面_マウスタイマ = function(event){
+    this.$画面.style.cursor = "auto";
+    if(this.$画面.マウスタイマ番号){
+        window.clearTimeout(this.$画面.マウスタイマ番号);
+    }
+    this.$画面.マウスタイマ番号 = window.setTimeout(timeout, 2500, this);
+
+    function timeout($){
+        $.$画面.style.cursor = "none";
+    }
+};
+
+
+
+jsplayer.$全画面_なら = function(){
+    var 全画面 = document.fullscreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+    return 全画面 === this.$画面;
+};
+
+
+
+jsplayer.$全画面_切り替え = function(){
+    if(this.$全画面.なら()){
+        if     (document.exitFullscreen)      { document.exitFullscreen(); }
+        else if(document.msExitFullscreen)    { document.msExitFullscreen(); }
+        else if(document.webkitExitFullscreen){ document.webkitExitFullscreen(); }
+        else if(document.mozCancelFullScreen) { document.mozCancelFullScreen(); }
+    }
+    else{
+        if     (this.$画面.requestFullscreen)      { this.$画面.requestFullscreen(); }
+        else if(this.$画面.msRequestFullscreen)    { this.$画面.msRequestFullscreen(); }
+        else if(this.$画面.webkitRequestFullscreen){ this.$画面.webkitRequestFullscreen(); }
+        else if(this.$画面.mozRequestFullScreen)   { this.$画面.mozRequestFullScreen(); }
     }
 };
 
@@ -831,7 +831,7 @@ jsplayer.$コメント表示ボタン_onclick = function(event){
 
 
 jsplayer.$全画面ボタン_onclick = function(event){
-    jsplayer.全画面.切り替え(this.$画面);
+    this.$全画面.切り替え();
 };
 
 
