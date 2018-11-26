@@ -595,14 +595,11 @@ jsplayer.$画面_onanimationend = function (event){
 
 jsplayer.$全画面_イベント = function(event){
     var 全画面 = document.fullscreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
-    if(全画面){
-        if(this.$画面 !== 全画面){
-            return;
-        }
+    if(全画面 === this.$画面){
         this.$全画面.開始();
         this.全画面 = this.$画面;
     }
-    else if(this.$画面 === this.全画面){
+    else if(this.全画面 === this.$画面){
         this.$全画面.終了();
         this.全画面 = null;
     }
@@ -610,7 +607,7 @@ jsplayer.$全画面_イベント = function(event){
 
 
 
-jsplayer.$全画面_開始 = function($画面){
+jsplayer.$全画面_開始 = function(){
     this.$画面.onmousedown  = this.$全画面.コントローラ表示切り替え;
     this.$画面.onmousemove  = this.$全画面.マウスタイマ;
     this.$画面.style.cursor = "none";
