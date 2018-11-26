@@ -2,11 +2,14 @@
 function jsplayer(args){
     jsplayer.セットアップ();
 
-    var $ = jsplayer.SilverState(jsplayer, jsplayer.HTML, jsplayer.CSS);
+    if(typeof args.el === 'string'){
+        args.el = document.querySelector(args.el);
+    }
 
-    jsplayer.初回描画($, args.el);
+    var $ = jsplayer.SilverState(jsplayer, jsplayer.HTML, jsplayer.CSS, {args: args});
 
-    $.args         = args;
+    jsplayer.初回描画($);
+
     $.コメント設定 = jsplayer.コメント設定($.$画面.高さ);
     $.$動画.src    = args.file;
 }
@@ -43,13 +46,13 @@ jsplayer.セットアップ = function (){
 
 
 
-jsplayer.初回描画 = function ($, el){
+jsplayer.初回描画 = function ($){
     if     (document.fullscreenEnabled)      { document.addEventListener("fullscreenchange",       $.$全画面.イベント); }
     else if(document.msFullscreenEnabled)    { document.addEventListener("MSFullscreenChange",     $.$全画面.イベント); }
     else if(document.webkitFullscreenEnabled){ document.addEventListener("webkitfullscreenchange", $.$全画面.イベント); }
     else if(document.mozFullScreenEnabled)   { document.addEventListener("mozfullscreenchange",    $.$全画面.イベント); }
 
-    el.parentNode.replaceChild($.$jsplayer, el);
+    $.args.el.parentNode.replaceChild($.$jsplayer, $.args.el);
 
     //サイズキャッシュ
     $.$画面.横幅             = jsplayer.csslen($.$画面, 'width');
@@ -474,23 +477,30 @@ jsplayer.$コメント_取得 = function(){
         this.コメント[i] = [];
     }
 
-    if(!this.args.himado){
-        return;
+    if(this.args.himado){
+        var url = "http://himado.in/?" + jsplayer.ajax.param({
+            mode     : "comment",
+            format   : "nico",
+            limit    : 10000,
+            id       : this.args.himado,
+            group_id : this.args.group_id || "",
+            key      : this.args.key || "",
+            nocache  : Date.now()
+        });
+        var proxy = jsplayer.URL + "proxy.php?" + jsplayer.ajax.param({url: url});
+        jsplayer.ajax({url: proxy, ok: this.$コメント.取得成功, mime:'text/xml'});
     }
-
-    var url = "http://himado.in/?" + jsplayer.ajax.param({
-        mode     : "comment",
-        format   : "nico",
-        limit    : 10000,
-        id       : this.args.himado,
-        group_id : this.args.group_id || "",
-        key      : this.args.key || "",
-        nocache  : Date.now()
-    });
-
-    var proxy = jsplayer.URL + "proxy.php?" + jsplayer.ajax.param({url: url});
-
-    jsplayer.ajax({url: proxy, ok: this.$コメント.取得成功, mime:'text/xml'});
+    else if(this.args.comment){
+        var comment = JSON.parse(this.args.comment);
+        for(var i = 0; i < comment.length; i++){
+            var 本文 = comment[i][0];
+            var 時間 = comment[i][1];
+            var 番号 = Math.floor(時間);
+            if(Array.isArray(this.コメント[番号])){
+                this.コメント[番号].push([本文, 時間]);
+            }
+        }
+    }
 };
 
 
