@@ -40,11 +40,16 @@ foreach(array_reverse(stream_get_meta_data($fp)['wrapper_data']) as $v){
     if(preg_match("/^Set-Cookie/i", $v)){
         continue;
     }
-    if(preg_match("|^HTTP/|i", $v)){
+    else if(preg_match("/^Access-Control-Allow-Origin/i", $v)){
+        continue;
+    }
+    else if(preg_match("|^HTTP/|i", $v)){
         break;
     }
     header($v);
 }
+header("Access-Control-Allow-Origin: *");
+
 
 while(!feof($fp)){
     print fread($fp, 8192);
