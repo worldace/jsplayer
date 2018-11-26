@@ -2,10 +2,11 @@
 function jsplayer(args){
     jsplayer.セットアップ();
 
-    var $ = jsplayer.SilverState(jsplayer, jsplayer.HTML, jsplayer.CSS, {args: args, $コメント: {}});
+    var $ = jsplayer.SilverState(jsplayer, jsplayer.HTML, jsplayer.CSS);
 
-    jsplayer.初回描画($);
+    jsplayer.初回描画($, args.el);
 
+    $.args         = args;
     $.コメント設定 = jsplayer.コメント設定($.$画面.高さ);
     $.$動画.src    = args.file;
 }
@@ -13,6 +14,25 @@ function jsplayer(args){
 
 
 jsplayer.セットアップ = function (){
+    //URL
+    var currentScript = document.querySelector("script[src*='jsplayer.js']");
+    jsplayer.URL      = currentScript.src.replace(/\/[^\/]*$/, '') + '/'; //PHPの dirname() 相当
+
+    //LocalStorage
+    jsplayer.ユーザ設定      = jsplayer.loadLocalStorage("jsplayer");
+    jsplayer.ユーザ設定.音量 = Number(jsplayer.ユーザ設定.音量 || 1);
+
+    //イベント登録
+    window.addEventListener('unload', function(event){
+        jsplayer.saveLocalStorage("jsplayer", jsplayer.ユーザ設定);
+    });
+
+    if     (document.fullscreenEnabled)      { document.addEventListener("fullscreenchange",       jsplayer.全画面); }
+    else if(document.msFullscreenEnabled)    { document.addEventListener("MSFullscreenChange",     jsplayer.全画面); }
+    else if(document.webkitFullscreenEnabled){ document.addEventListener("webkitfullscreenchange", jsplayer.全画面); }
+    else if(document.mozFullScreenEnabled)   { document.addEventListener("mozfullscreenchange",    jsplayer.全画面); }
+
+    //ブラウザバグ対策
     if(navigator.userAgent.indexOf('Edge/') >= 0){ //Edge(Fall Creators)でコメントが表示されないバグ対策
         jsplayer.CSS += '.jsplayer-コメント{opacity:1;}';
     }
@@ -23,25 +43,13 @@ jsplayer.セットアップ = function (){
         delete jsplayer.$音量調節枠_onwheel;
     }
 
-    jsplayer.ユーザ設定      = jsplayer.loadLocalStorage("jsplayer");
-    jsplayer.ユーザ設定.音量 = Number(jsplayer.ユーザ設定.音量 || 1);
-
-    window.addEventListener('unload', function(event){
-        jsplayer.saveLocalStorage("jsplayer", jsplayer.ユーザ設定);
-    });
-
-    if     (document.fullscreenEnabled)      { document.addEventListener("fullscreenchange",       jsplayer.全画面); }
-    else if(document.msFullscreenEnabled)    { document.addEventListener("MSFullscreenChange",     jsplayer.全画面); }
-    else if(document.webkitFullscreenEnabled){ document.addEventListener("webkitfullscreenchange", jsplayer.全画面); }
-    else if(document.mozFullScreenEnabled)   { document.addEventListener("mozfullscreenchange",    jsplayer.全画面); }
-
     jsplayer.セットアップ = function (){};
 };
 
 
 
-jsplayer.初回描画 = function ($){
-    $.args.el.parentNode.replaceChild($.$jsplayer, $.args.el);
+jsplayer.初回描画 = function ($, el){
+    el.parentNode.replaceChild($.$jsplayer, el);
 
     //サイズキャッシュ
     $.$画面.横幅             = jsplayer.csslen($.$画面, 'width');
@@ -430,7 +438,7 @@ jsplayer.$動画_onvolumechange = function(event){
         jsplayer.ユーザ設定.音量 = this.$動画.volume;
     }
     var ポインタ = jsplayer.ポインタ位置計算(this.$動画.volume, this.$音量調節ポインタ);
-    this.$音量調節ポインタ.style.left = ポインタ.位置 + "px";console.log(ポインタ.位置);
+    this.$音量調節ポインタ.style.left = ポインタ.位置 + "px";
 };
 
 
@@ -464,7 +472,8 @@ jsplayer.$動画_onerror = function(event){
 
 
 jsplayer.$コメント_DOM作成 = function(data, レーン番号){
-    var el                  = document.createElement("span");
+    var el = document.createElement("span");
+
     el.textContent          = data[0];
     el.className            = "jsplayer-コメント";
     el.laneNumber           = レーン番号;
@@ -565,13 +574,13 @@ jsplayer.$コメント_全消去 = function(){
 
 
 jsplayer.$コメント_取得 = function(){
-    var 秒 = Math.floor(this.$動画.duration);
-
     if(this.コメント){
         return;
     }
 
+    var 秒        = Math.floor(this.$動画.duration);
     this.コメント = Array(秒 + 1); //動画時間+1の箱を作る [[],[],[],[]...]
+
     for(var i = 0; i < this.コメント.length; i++){
         this.コメント[i] = [];
     }
@@ -590,7 +599,7 @@ jsplayer.$コメント_取得 = function(){
         nocache  : Date.now()
     });
 
-    var proxy = "http://127.0.0.1/jsplayer/proxy.php?" + jsplayer.ajax.param({url: url});
+    var proxy = jsplayer.URL + "proxy.php?" + jsplayer.ajax.param({url: url});
 
     jsplayer.ajax({url: proxy, ok: this.$コメント.取得成功, mime:'text/xml'});
 };
@@ -604,12 +613,12 @@ jsplayer.$コメント_取得成功 = function(xhr){
 
     var chat = xhr.responseXML.querySelectorAll("chat");
     for(var i = chat.length-1; i >= 0; i--){
-        var 本文 = chat[i].textContent || "";
+        var 本文 = chat[i].textContent.substring(0,64);
         var vpos = Number(chat[i].getAttribute("vpos") || 0) / 100;
         var 番号 = Math.floor(vpos);
 
         if(Array.isArray(this.コメント[番号])){
-            this.コメント[番号].push([本文.substring(0,64), vpos]);
+            this.コメント[番号].push([本文, vpos]);
         }
     }
 };
@@ -632,18 +641,17 @@ jsplayer.$コメント_投稿 = function(){
     this.$コメント入力.value = "";
 
     if(this.args.himado && this.args.group_id){
-        var group_id = String(this.args.group_id).split(',')[0];
-        var param    = {
+        var param = {
             mode     : "comment",
             id       : this.args.himado,
             vpos     : 時間.toFixed(2) * 100,
             comment  : 本文,
             mail     : '',
-            group_id : group_id,
+            group_id : String(this.args.group_id).split(',')[0],
             adddate  : Math.floor(Date.now()/1000),
         };
         var url   = 'http://himado.in/api/player?' + jsplayer.ajax.param(param);
-        var proxy = "http://127.0.0.1/jsplayer/proxy.php?" + jsplayer.ajax.param({url: url});
+        var proxy = jsplayer.URL + "proxy.php?" + jsplayer.ajax.param({url: url});
 
         jsplayer.ajax({url: proxy});
     }
@@ -986,7 +994,7 @@ jsplayer.SilverState = function(app, html, css, $){
         $[idName] = elements[i];
     }
 
-    //イベント登録
+    //プロパティ登録
     for(var name in app){
         if(name.indexOf('$') !== 0){
             continue;
@@ -994,7 +1002,9 @@ jsplayer.SilverState = function(app, html, css, $){
         var names     = name.substring(1).split('_');
         var eventName = names.pop();
         var idName    = '$' + names.join('_');
-
+        if(!(idName in $)){
+            $[idName] = {};
+        }
         $[idName][eventName] = (typeof app[name] === 'function')  ?  app[name].bind($)  :  app[name];
     }
 
