@@ -2,24 +2,25 @@
 
 
 
+
 ■設置方法
+
 
 [1] プログラムをダウンロードする
 https://github.com/worldace/jsplayer/archive/master.zip
 
 
-[2]  jsplayer.js と proxy.php をアップする
+[2] jsplayer.js と proxy.php をアップする
 
 ※両ファイルは同じディレクトリにアップしてください
 
 
-[3]  jsplayer.js を読み込む。<head>内に記述してください
+[3] jsplayer.js を読み込む。<head>内に記述してください
 
 <script src="jsplayer.js"></script>
 
 
-[4] <body>内に次のようなscriptタグを記述して jsplayer() を実行する
-この場合は、このscriptタグ自体がプレイヤに置換されます。
+[4] <body> 内に次のようなscriptタグを記述して jsplayer() を実行する
 
 <script id="player">
 jsplayer({
@@ -28,9 +29,14 @@ jsplayer({
 });
 </script>
 
+この場合は、このscriptタグ自体がプレイヤに置換されます。
+
+
 
 ■起動オプション一覧
+
 jsplayer({起動オプション});
+
 
 ----------------------------------------------------------------------------------------------
 el       : プレイヤを表示する場所をCSSセレクタかDOM要素で。このタグがプレイヤに置換されます

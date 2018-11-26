@@ -18,10 +18,18 @@ function jsplayer(args){
 
 
 
+jsplayer.proxy = 'proxy.php?url=';
+
+
+
 jsplayer.セットアップ = function (){
     //URL
     var currentScript = document.querySelector("script[src*='jsplayer.js']");
     jsplayer.URL      = currentScript.src.replace(/\/[^\/]*$/, '') + '/'; //PHPの dirname() 相当
+
+    if(!jsplayer.proxy.match('http')){
+        jsplayer.proxy = jsplayer.URL + jsplayer.proxy;
+    }
 
     //LocalStorage
     jsplayer.ユーザ設定      = jsplayer.loadLocalStorage("jsplayer");
@@ -489,7 +497,7 @@ jsplayer.$コメント_取得 = function(){
             key      : this.args.key || "",
             nocache  : Date.now()
         });
-        var proxy = jsplayer.URL + "proxy.php?" + jsplayer.ajax.param({url: url});
+        var proxy = jsplayer.proxy + encodeURIComponent(url);
         jsplayer.ajax({url: proxy, ok: this.$コメント.取得成功, mime:'text/xml'});
     }
     else if(this.args.comment){
@@ -552,7 +560,7 @@ jsplayer.$コメント_投稿 = function(){
             adddate  : Math.floor(Date.now()/1000),
         };
         var url   = 'http://himado.in/api/player?' + jsplayer.ajax.param(param);
-        var proxy = jsplayer.URL + "proxy.php?" + jsplayer.ajax.param({url: url});
+        var proxy = jsplayer.proxy + encodeURIComponent(url);
 
         jsplayer.ajax({url: proxy});
     }
