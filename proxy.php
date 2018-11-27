@@ -1,7 +1,7 @@
 <?php
 //■PHPプロキシ
 //使用方法: http://example.com/proxy.php?url=対象URL
-//動作条件: php.iniの「allow_url_fopen」が有効であること。クッキーは無効
+//動作条件: php.iniの「allow_url_fopen」が有効であること。クッキーは無視されます
 
 
 //PHPの実行時間制限(単位は秒、0で無制限)
@@ -11,7 +11,7 @@
 while(ob_get_level()){ ob_end_clean(); }
 
 if(!isset($_GET['url']) or !preg_match("|^https?://|i", $_GET['url'])){
-    proxyエラー();
+    error400();
 }
 
 $request_header = "";
@@ -33,7 +33,7 @@ $context = stream_context_create([
 
 $fp = @fopen($_GET['url'], 'rb', false, $context);
 if($fp === false){
-    proxyエラー();
+    error400();
 }
 
 foreach(array_reverse(stream_get_meta_data($fp)['wrapper_data']) as $v){
@@ -56,7 +56,7 @@ while(!feof($fp)){
 }
 
 
-function proxyエラー(){
+function error400(){
     header('HTTP', true, 400);
     exit;
 }

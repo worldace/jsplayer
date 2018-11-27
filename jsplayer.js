@@ -287,7 +287,7 @@ jsplayer.$動画_ontimeupdate = function(event){
         var 時間 = jsplayer.ポインタ位置計算(this.$動画.currentTime/this.$動画.duration, this.$時間調節ポインタ);
         this.$時間調節ポインタ.style.left = 時間.位置 + "px";
     }
-    if(Array.isArray(this.コメント[秒])  &&  this.$動画.paused === false  &&  !this.$コメント表示ボタン.hasAttribute("data-off")){
+    if(!this.$動画.paused && !this.$コメント表示ボタン.hasAttribute("data-off")){
         this.$コメント.放流(this.コメント[秒]);
     }
 };
@@ -390,6 +390,10 @@ jsplayer.$コメント_DOM作成 = function(data, レーン番号){
 
 
 jsplayer.$コメント_放流 = function(コメント){
+    if(!Array.isArray(コメント)){
+        return;
+    }
+
     var レーン       = this.$コメント.レーン確認();
     var fragment     = document.createDocumentFragment();
     var コメント番号 = 0;
@@ -480,9 +484,7 @@ jsplayer.$コメント_取得 = function(){
         return;
     }
 
-    var 秒        = Math.floor(this.$動画.duration);
-    this.コメント = Array(秒 + 1); //動画時間+1の箱を作る [[],[],[],[]...]
-
+    this.コメント = Array(Math.floor(this.$動画.duration) + 1); //動画時間+1の箱を作る [[],[],[],[]...]
     for(var i = 0; i < this.コメント.length; i++){
         this.コメント[i] = [];
     }
@@ -653,6 +655,7 @@ jsplayer.$全画面_終了 = function(){
     this.$画面.onmousemove = null;
     if(this.$画面.マウスタイマ番号){
         window.clearTimeout(this.$画面.マウスタイマ番号);
+        this.$画面.マウスタイマ番号 = null;
     }
     this.$画面.style.cursor = "auto";
 
@@ -1015,13 +1018,16 @@ jsplayer.SilverState = function(app, html, css, $){
         if(name.indexOf('$') !== 0){
             continue;
         }
-        var names     = name.substring(1).split('_');
-        var eventName = names.pop();
-        var idName    = '$' + names.join('_');
+        var names = name.substring(1).split('_');
+        if(names.length < 2){
+            continue;
+        }
+        var propName = names.pop();
+        var idName   = '$' + names.join('_');
         if(!(idName in $)){
             $[idName] = {};
         }
-        $[idName][eventName] = (typeof app[name] === 'function')  ?  app[name].bind($)  :  app[name];
+        $[idName][propName] = (typeof app[name] === 'function')  ?  app[name].bind($)  :  app[name];
     }
 
     $['$'+appName].$ = $;
