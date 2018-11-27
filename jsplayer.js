@@ -1,4 +1,4 @@
-/* ■jsplayer  */
+/* ■jsplayer https://spelunker2.wordpress.com/2018/11/27/jsplayer2/ */
 
 
 function jsplayer(args){
