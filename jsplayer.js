@@ -390,7 +390,7 @@ jsplayer.$コメント_DOM作成 = function(data, レーン番号){
 
 
 jsplayer.$コメント_放流 = function(コメント){
-    if(!Array.isArray(コメント)){
+    if(!Array.isArray(コメント) || !コメント.length){
         return;
     }
 
