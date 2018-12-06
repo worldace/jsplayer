@@ -1,5 +1,5 @@
 <?php
-//■PHPプロキシ
+//■PHP CORSプロキシ
 //使用方法: http://example.com/proxy.php?url=対象URL
 //動作条件: php.iniの「allow_url_fopen」が有効であること。クッキーは無視されます
 

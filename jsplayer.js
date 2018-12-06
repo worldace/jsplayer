@@ -121,22 +121,22 @@ jsplayer.コメント遅延計算 = function (コメント時間, 動画時間){
 
 
 jsplayer.コメント設定 = function(画面高さ){
-    var 設定 = {};
+    var コメント設定 = {};
 
     if(画面高さ >= 360){
-        設定.レーン数   = Math.floor((画面高さ-360)/180) + 10;
-        設定.レーン高さ = 画面高さ / 設定.レーン数 * 0.8;
-        設定.フォント   = 設定.レーン高さ / 6 * 5; //22.5px以上必要
-        設定.マージン   = 設定.レーン高さ / 6;
+        コメント設定.レーン数   = Math.floor((画面高さ-360)/180) + 10;
+        コメント設定.レーン高さ = 画面高さ / コメント設定.レーン数 * 0.8;
+        コメント設定.文字サイズ = コメント設定.レーン高さ / 6 * 5; //22.5px以上必要
+        コメント設定.マージン   = コメント設定.レーン高さ / 6;
     }
     else{
-        設定.レーン数   = Math.floor(画面高さ*0.8/30);
-        設定.レーン高さ = 30;
-        設定.フォント   = 25;
-        設定.マージン   = 5;
+        コメント設定.レーン数   = Math.floor(画面高さ*0.8/30);
+        コメント設定.レーン高さ = 30;
+        コメント設定.文字サイズ = 25;
+        コメント設定.マージン   = 5;
     }
 
-    return 設定;
+    return コメント設定;
 };
 
 
@@ -380,7 +380,7 @@ jsplayer.$コメント_DOM作成 = function(data, レーン番号){
     el.className            = "jsplayer-コメント";
     el.laneNumber           = レーン番号;
     el.style.top            = レーン番号 * this.コメント設定.レーン高さ + this.コメント設定.マージン + "px";
-    el.style.fontSize       = this.コメント設定.フォント + "px";
+    el.style.fontSize       = this.コメント設定.文字サイズ + "px";
     el.style.animationName  = this.$全画面.なら() ? "jsplayer-fullscreen-lane" : "jsplayer-normal-lane";
     el.style.animationDelay = jsplayer.コメント遅延計算(data[1], this.$動画.currentTime);
 
@@ -582,7 +582,7 @@ jsplayer.$画面_OSD表示 = function(str){
     var osd = document.createElement("span");
     osd.textContent = str;
     osd.className   = "jsplayer-OSD";
-    osd.style.fontSize = this.コメント設定.フォント + "px";
+    osd.style.fontSize = this.コメント設定.文字サイズ + "px";
 
     this.$画面.OSD消去();
     this.$画面.appendChild(osd);
