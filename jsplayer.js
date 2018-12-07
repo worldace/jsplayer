@@ -149,7 +149,7 @@ jsplayer.キーフレーム追加 = function(名前, 画面横幅){
     var css  = "";
         css += "@keyframes " + 名前 + "{";
         css += "from{transform:translateX(0);}";
-        css += "to{transform:translateX(-" + 画面横幅*5 + "px);}}";
+        css += "to{transform:translateX(-" + 画面横幅*10 + "px);}}";
 
     var style       = document.createElement('style');
     style.innerHTML = css;
@@ -1298,7 +1298,7 @@ jsplayer.CSS = (function() {/*
     text-shadow: -1px -1px #333, 1px -1px #333, -1px 1px #333, 1px 1px #333;
     animation-fill-mode: forwards;
     animation-timing-function: linear;
-    animation-duration: 17s;
+    animation-duration: 34s;
     opacity: 0.8;
 }
 .jsplayer[data-pause] .jsplayer-コメント{
