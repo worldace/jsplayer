@@ -295,14 +295,12 @@ jsplayer.$動画_ontimeupdate = function(event){
 
 
 jsplayer.$動画_onplay = function(event){
-    this.$コメント.再生();
     this.$jsplayer.removeAttribute("data-pause");
 };
 
 
 
 jsplayer.$動画_onpause = function(event){
-    this.$コメント.停止();
     this.$jsplayer.setAttribute("data-pause", "");
 };
 
@@ -439,30 +437,6 @@ jsplayer.$コメント_レーン確認 = function(){
     }
 
     return レーン;
-};
-
-
-
-jsplayer.$コメント_再生 = function(){
-    var コメント = this.$画面.children;
-
-    for(var i = 0; i < コメント.length; i++){
-        if(コメント[i].classList[0] === "jsplayer-コメント"){
-            コメント[i].style.animationPlayState = "running";
-        }
-    }
-};
-
-
-
-jsplayer.$コメント_停止 = function(){
-    var コメント = this.$画面.children;
-
-    for(var i = 0; i < コメント.length; i++){
-        if(コメント[i].classList[0] === "jsplayer-コメント"){
-            コメント[i].style.animationPlayState = "paused";
-        }
-    }
 };
 
 
@@ -1326,5 +1300,8 @@ jsplayer.CSS = (function() {/*
     animation-timing-function: linear;
     animation-duration: 17s;
     opacity: 0.8;
+}
+.jsplayer[data-pause] .jsplayer-コメント{
+    animation-play-state: paused;
 }
 */}).toString().match(/\/\*([^]*)\*\//)[1].trim();
