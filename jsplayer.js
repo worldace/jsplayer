@@ -558,32 +558,11 @@ jsplayer.$画面_OSD表示 = function(str){
     osd.className   = "jsplayer-OSD";
     osd.style.fontSize = this.コメント設定.文字サイズ + "px";
 
-    this.$画面.OSD消去();
+    var old = this.$画面.querySelector(".jsplayer-OSD");
+    if(old){
+        this.$画面.removeChild(old);
+    }
     this.$画面.appendChild(osd);
-    this.$画面.OSD番号 = window.setTimeout(this.$画面.OSD消去, 3000);
-};
-
-
-
-jsplayer.$画面_OSD消去 = function(){
-    var osd = this.$画面.children;
-
-    for(var i = osd.length-1; i >= 0; i--){
-        if(osd[i].classList[0] === 'jsplayer-OSD'){
-            this.$画面.removeChild(osd[i]);
-        }
-    }
-    if(this.$画面.OSD番号){
-        window.clearTimeout(this.$画面.OSD番号);
-    }
-};
-
-
-
-jsplayer.$画面_onanimationend = function (event){
-    if(event.target.classList[0] === 'jsplayer-コメント'){
-        this.$画面.removeChild(event.target);
-    }
 };
 
 
@@ -1117,6 +1096,16 @@ jsplayer.CSS = (function() {/*
     background-color: #000;
     color:#0f0;
     z-index: 3;
+    animation-name: jsplayer-osd-hide;
+    animation-duration: 3s;
+    animation-fill-mode: forwards;
+    animation-timing-function: step-end;
+}
+
+@keyframes jsplayer-osd-hide{
+    100%{
+        opacity: 0;
+    }
 }
 
 .jsplayer-コントローラ{
