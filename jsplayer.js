@@ -553,9 +553,9 @@ jsplayer.$コメント_投稿 = function(){
 
 
 jsplayer.$画面_OSD表示 = function(str){
-    var osd = document.createElement("span");
-    osd.textContent = str;
-    osd.className   = "jsplayer-OSD";
+    var osd            = document.createElement("span");
+    osd.textContent    = str;
+    osd.className      = "jsplayer-OSD";
     osd.style.fontSize = this.コメント設定.文字サイズ + "px";
 
     var old = this.$画面.querySelector(".jsplayer-OSD");
