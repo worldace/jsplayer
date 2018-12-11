@@ -350,6 +350,7 @@ jsplayer.$動画_onratechange = function(event){
 
 
 jsplayer.$動画_onerror = function(event){
+    this.$コメント.全消去();
     var error = event.target.error; // http://www.html5.jp/tag/elements/video.html
 
     if(error.code === error.MEDIA_ERR_SRC_NOT_SUPPORTED){
