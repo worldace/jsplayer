@@ -1289,7 +1289,7 @@ jsplayer.CSS = (function() {/*
     animation-fill-mode: forwards;
     animation-timing-function: linear;
     animation-duration: 34s;
-    opacity: 0.8;
+    opacity: 0.95;
 }
 .jsplayer[data-pause] .jsplayer-コメント{
     animation-play-state: paused;
