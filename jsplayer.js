@@ -307,7 +307,7 @@ jsplayer.$動画_onpause = function(event){
 
 
 jsplayer.$動画_onprogress = function(event){
-    var buffer = this.$動画.buffered;
+    var buffer = this.$動画.buffered || [];
     var end    = 0;
 
     for(var i = 0; i < buffer.length; i++){
