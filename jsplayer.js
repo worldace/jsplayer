@@ -308,10 +308,14 @@ jsplayer.$動画_onpause = function(event){
 
 jsplayer.$動画_onprogress = function(event){
     var buffer = this.$動画.buffered;
+    var end    = 0;
 
-    if(buffer.length){
-        this.$時間調節バー.style.backgroundSize = buffer.end(buffer.length-1) / this.$動画.duration * this.$時間調節バー.横幅 + "px";
+    for(var i = 0; i < buffer.length; i++){
+        if(buffer.end(i) > end){
+            end = buffer.end(i);
+        }
     }
+    this.$時間調節バー.style.backgroundSize = end / this.$動画.duration * this.$時間調節バー.横幅 + "px";
 };
 
 
