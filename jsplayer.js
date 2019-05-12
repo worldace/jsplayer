@@ -310,8 +310,7 @@ jsplayer.$動画_onprogress = function(event){
     var buffer = this.$動画.buffered;
 
     if(buffer.length){
-        this.$時間調節バー.style.backgroundPosition = buffer.start(0) / this.$動画.duration * this.$時間調節バー.横幅 + "px";
-        this.$時間調節バー.style.backgroundSize     = buffer.end(buffer.length-1) / this.$動画.duration * this.$時間調節バー.横幅 + "px";
+        this.$時間調節バー.style.backgroundSize = buffer.end(buffer.length-1) / this.$動画.duration * this.$時間調節バー.横幅 + "px";
     }
 };
 
