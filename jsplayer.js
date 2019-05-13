@@ -256,7 +256,7 @@ jsplayer.$動画_ondblclick = function(event){
 jsplayer.$動画_onloadedmetadata = function(event){
 
     this.$コメント.取得();
-    this.$動画.onprogress();
+    this.$動画.progress();
 
     this.$コメント入力.disabled       = false;
     this.$コメント投稿ボタン.disabled = false;
@@ -288,6 +288,7 @@ jsplayer.$動画_ontimeupdate = function(event){
         this.$時間調節ポインタ.style.left = 時間.位置 + "px";
     }
     if(!this.$動画.paused && !this.$jsplayer.hasAttribute("data-comment_off")){
+    this.$動画.progress();
         this.$コメント.放流(this.コメント[秒]);
     }
 };
@@ -306,7 +307,7 @@ jsplayer.$動画_onpause = function(event){
 
 
 
-jsplayer.$動画_onprogress = function(event){
+jsplayer.$動画_progress = function(event){ //firefoxだとonprogressが上手く機能しないので手動実行する
     var buffer = this.$動画.buffered || [];
     var end    = 0;
 
