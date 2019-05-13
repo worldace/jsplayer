@@ -115,7 +115,7 @@ jsplayer.ポインタ位置計算 = function(現在値, $ポインタ){
 
 jsplayer.コメント遅延計算 = function (コメント時間, 動画時間){
     var 遅延 = コメント時間 - 動画時間;
-    return (遅延 <= 0)  ?  0  :  遅延.toFixed(3)*1000 + "ms";
+    return (遅延 <= 0)  ?  1 + "ms"  :  遅延.toFixed(3)*1000 + "ms";
 };
 
 
