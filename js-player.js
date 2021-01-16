@@ -1,10 +1,7 @@
 /*
-■必須
-$動画_progress
-
-■任意
 全画面中のスタイル
-ポインタ位置 -> 移動したときにプロパティで保存したら？
+ポインタ位置
+buffer
 */
 
 
@@ -19,7 +16,6 @@ class jsplayer extends HTMLElement{
 
         this.$画面.初期幅           = this.csslen(this.$jsplayer, '--画面初期幅')
         this.$画面.初期高さ         = this.csslen(this.$jsplayer, '--画面初期高さ')
-        this.$時間調節バー.横幅     = this.csslen(this.$時間調節バー, 'width')
         this.$時間調節ポインタ.横幅 = this.csslen(this.$時間調節ポインタ, 'width')
         this.$音量調節ポインタ.横幅 = this.csslen(this.$音量調節ポインタ, 'width')
 
@@ -58,20 +54,20 @@ class jsplayer extends HTMLElement{
 
     時間変更(sec){
         if(this.$動画.duration){
-            this.$動画.currentTime = this.minmax(0, Math.floor(sec), this.$動画.duration)
+            this.$動画.currentTime = this.limit(0, Math.floor(sec), this.$動画.duration)
         }
     }
 
 
     音量変更(vol){
-        this.$動画.volume = this.minmax(0, vol.toFixed(1), 1)
+        this.$動画.volume = this.limit(0, vol.toFixed(1), 1)
         this.$動画.muted  = false
     }
 
 
     再生速度変更(speed){
         if(this.$動画.duration){
-            this.$動画.playbackRate = this.minmax(0.5, speed.toFixed(1), 3)
+            this.$動画.playbackRate = this.limit(0.5, speed.toFixed(1), 3)
         }
     }
 
@@ -82,7 +78,7 @@ class jsplayer extends HTMLElement{
         const 横幅  = width - $ポインタ.横幅
         const 位置  = (current <= 1) ? current*横幅 : current-left
 
-        return {'位置':this.minmax(0, 位置, 横幅), '割合':this.minmax(0, 位置/横幅, 1)}
+        return {'位置':this.limit(0, 位置, 横幅), '割合':this.limit(0, 位置/横幅, 1)}
     }
 
 
@@ -196,14 +192,14 @@ class jsplayer extends HTMLElement{
             return
         }
 
-        const limit = Math.floor(this.$動画.duration) + 1
+        const max = Math.floor(this.$動画.duration) + 1
  
-        this.コメント = Array(limit).fill().map(v => [])
+        this.コメント = Array(max).fill().map(v => [])
 
         for(const v of JSON.parse(this.comment)){
             const n = Math.floor(v[1])
 
-            if(n < limit){
+            if(n < max){
                 this.コメント[n].unshift(v)
             }
         }
@@ -246,6 +242,7 @@ class jsplayer extends HTMLElement{
 
 
     $動画_loadedmetadata(event){
+        this.bufferMax                    = 0
         this.$コメント入力.disabled       = false
         this.$コメント投稿ボタン.disabled = false
         this.$合計時間.textContent        = this.時間整形(this.$動画.duration)
@@ -289,20 +286,19 @@ class jsplayer extends HTMLElement{
         this.$jsplayer.setAttribute('data-pause', '')
     }
 
-/*
-    $動画_progress(event){ //firefoxだとonprogressが上手く機能しないので手動実行する
-        const buffer = this.$動画.buffered
-        let   end    = 0
 
-        for(const i of buffer.keys()){
-            if(buffer.end(i) > end){
-                end = buffer.end(i)
+    $動画_progress(event){
+        const buffer = this.$動画.buffered
+
+        for(let i = 0; i < buffer.length; i++){
+            if(buffer.end(i) > this.bufferMax){
+                this.bufferMax = buffer.end(i)
             }
         }
 
-        this.$時間調節バー.style.backgroundSize = end / this.$動画.duration * this.$時間調節バー.横幅 + 'px'
+        //this.$時間調節バー.style.backgroundSize = `${this.bufferMax / this.$動画.duration * 100}%`
     }
-*/
+
 
     $動画_seeking(event){
         this.コメント全消去()
@@ -380,7 +376,7 @@ class jsplayer extends HTMLElement{
     $時間調節ポインタ_mousedown(event){
         if(this.$動画.duration){
             this.$時間調節ポインタ.isDrag = true
-            document.addEventListener('mousemove', this.時間調節ポインタ操作中_event)
+            document.addEventListener('mousemove', this.時間調節ポインタ操作_event)
             document.addEventListener('mouseup', this.時間調節ポインタ操作終了_event, {once:true})
         }
     }
@@ -416,7 +412,7 @@ class jsplayer extends HTMLElement{
     $音量調節ポインタ_mousedown(event){
         this.$音量調節ポインタ.isDrag = true
 
-        document.addEventListener('mousemove', this.音量調節ポインタ操作中_event)
+        document.addEventListener('mousemove', this.音量調節ポインタ操作_event)
         document.addEventListener('mouseup', this.音量調節ポインタ操作終了_event, {once:true})
     }
 
@@ -505,7 +501,7 @@ class jsplayer extends HTMLElement{
 
 
 
-    時間調節ポインタ操作中_event(event){
+    時間調節ポインタ操作_event(event){
         const ポインタ = this.ポインタ位置(event.clientX, this.$時間調節ポインタ)
         this.$現在時間.textContent        = this.時間整形(this.$動画.duration * ポインタ.割合)
         this.$時間調節ポインタ.style.left = ポインタ.位置 + 'px'
@@ -513,7 +509,7 @@ class jsplayer extends HTMLElement{
 
 
     時間調節ポインタ操作終了_event(event){
-        document.removeEventListener('mousemove', this.時間調節ポインタ操作中_event)
+        document.removeEventListener('mousemove', this.時間調節ポインタ操作_event)
         this.$時間調節ポインタ.isDrag = false
 
         const ポインタ = this.ポインタ位置(event.clientX, this.$時間調節ポインタ)
@@ -521,13 +517,13 @@ class jsplayer extends HTMLElement{
     }
 
 
-    音量調節ポインタ操作中_event(event){
+    音量調節ポインタ操作_event(event){
         this.音量変更(this.ポインタ位置(event.clientX, this.$音量調節ポインタ).割合)
     }
 
 
     音量調節ポインタ操作終了_event(event){
-        document.removeEventListener('mousemove', this.音量調節ポインタ操作中_event)
+        document.removeEventListener('mousemove', this.音量調節ポインタ操作_event)
 
         this.$音量調節ポインタ.isDrag = false
     }
@@ -595,7 +591,7 @@ class jsplayer extends HTMLElement{
 
 
 
-    minmax(min, val, max){
+    limit(min, val, max){
         if(val < min){
             return min
         }
