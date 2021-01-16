@@ -247,30 +247,30 @@ class jsplayer extends HTMLElement{
             const n = Math.floor(v[1])
 
             if(n < limit){
-                this.コメント[n].push(v)
+                this.コメント[n].unshift(v)
             }
         }
     }
 
 
     コメント投稿(){
-        const time = this.$動画.currentTime
-        const sec  = Math.floor(time)
         const text = this.$コメント入力.value.trim()
-        const body = new URLSearchParams({vpos:time.toFixed(2), comment:text, file:this.$動画.src})
 
-        this.$コメント入力.value = ''
-
-        if(text === '' || text.length > 64 || !this.post){
+        if(text === '' || !this.post || !this.$動画.duration){
             return
         }
+
+        const time = this.$動画.currentTime
+        const sec  = Math.floor(time)
+        const body = new URLSearchParams({vpos:time.toFixed(2), comment:text, file:this.$動画.src})
 
         fetch(this.post, {method:'POST', body})
 
         if(Array.isArray(this.コメント[sec+1])){
             this.コメント[sec+1].unshift([text, time+1])
         }
-
+ 
+        this.$コメント入力.value = ''
     }
 
 
@@ -620,8 +620,7 @@ class jsplayer extends HTMLElement{
 
 
     csslen(el, property){
-        const value = property.startsWith('--') ? getComputedStyle(el).getPropertyValue(property) : getComputedStyle(el)[property]
-        return parseInt(value, 10) || 0
+        return parseInt(getComputedStyle(el).getPropertyValue(property), 10) || 0
     }
 
 
