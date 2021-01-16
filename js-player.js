@@ -1,6 +1,5 @@
 /*
 全画面中のスタイル
-ポインタ cssは 音量 calc(100%-10px)
 buffer
 */
 
@@ -14,10 +13,8 @@ class jsplayer extends HTMLElement{
         this.設定      = this.load('jsplayer')
         this.設定.音量 = this.設定.音量 || 1
 
-        this.$画面.初期幅         = this.csslen(this.$jsplayer, '--画面初期幅')
-        this.$画面.初期高さ       = this.csslen(this.$jsplayer, '--画面初期高さ')
-        this.$シークポインタ.横幅 = this.csslen(this.$シークポインタ, 'width')
-        this.$音量ポインタ.横幅   = this.csslen(this.$音量ポインタ, 'width')
+        this.$画面.初期幅   = this.csslen(this.$jsplayer, '--画面初期幅')
+        this.$画面.初期高さ = this.csslen(this.$jsplayer, '--画面初期高さ')
 
         document.addEventListener('fullscreenchange', this.全画面_event)
         window.addEventListener('unload', this.終了)
@@ -84,7 +81,7 @@ class jsplayer extends HTMLElement{
 
     ポインタ(current, $ポインタ){ //currentは「割合(0-1)」「クリックされた位置」の2パターンある
         const {width, left} = $ポインタ.parentNode.getBoundingClientRect()
-        const 横幅  = width - $ポインタ.横幅
+        const 横幅  = width - this.csslen($ポインタ, 'width')
         const 位置  = (current <= 1) ? current*横幅 : current-left
 
         return {'位置':this.limit(0, 位置, 横幅), '割合':this.limit(0, 位置/横幅, 1)}
