@@ -22,7 +22,7 @@ class jsplayer extends HTMLElement{
 
 
     static get observedAttributes(){
-        return ['file', 'himado', 'group_id', 'key', 'posturl']
+        return ['file', 'comment', 'posturl']
     }
 
 
@@ -117,7 +117,7 @@ class jsplayer extends HTMLElement{
 
 
     OSD表示(str){
-        const osd          = document.createElement('span')
+        const osd          = document.createElement('div')
         osd.textContent    = str
         osd.id             = 'OSD'
         osd.style.fontSize = `${this.コメント設定.文字サイズ}px`
@@ -153,7 +153,7 @@ class jsplayer extends HTMLElement{
 
 
     コメント描画(data, レーン番号){
-        const el = document.createElement('span')
+        const el = document.createElement('div')
 
         el.textContent          = data[0]
         el.className            = 'コメント'
@@ -221,47 +221,21 @@ class jsplayer extends HTMLElement{
     }
 
 
-    async コメント取得(){
-        if(this.コメント){
+    コメント取得(){
+        if(!this.コメント){
+            this.コメント = Array(Math.floor(this.$動画.duration) + 1).fill([]) //動画時間+1の箱を作る [[],[],[],[]...]
+        }
+        if(!this.comment){
             return
         }
 
-        this.コメント = Array(Math.floor(this.$動画.duration) + 1).fill([]) //動画時間+1の箱を作る [[],[],[],[]...]
+        for(const v of JSON.parse(this.comment)){
+            const text = v[0]
+            const vpos = v[1]
+            const n    = Math.floor(vpos)
 
-        if(this.himado){
-            const param = {
-                mode     : 'comment',
-                format   : 'nico',
-                limit    : 10000,
-                id       : this.himado,
-                group_id : this.group_id,
-                key      : this.key,
-                nocache  : Date.now()
-            }
-            const himado_url = `${encodeURIComponent('http://himado.in/?')}${new URLSearchParams(param)}`
-
-            const response = await fetch(`http://127.0.0.1/jsplayer/proxy.php?url=${himado_url}`)
-            const xml      = new DOMParser().parseFromString(await response.text(), 'text/xml')
-
-            for(const v of xml.querySelectorAll('chat')){
-                const text = v.textContent.substring(0, 64)
-                const vpos = Number(v.getAttribute('vpos') || 0) / 100
-                const n    = Math.floor(vpos)
-
-                if(Array.isArray(this.コメント[n])){
-                    this.コメント[n].unshift([text, vpos])
-                }
-            }
-        }
-        else if(this.comment){
-            for(const v of JSON.parse(this.comment)){
-                const text = v[0]
-                const vpos = v[1]
-                const n    = Math.floor(vpos)
-
-                if(Array.isArray(this.コメント[n])){
-                    this.コメント[n].unshift([text, vpos])
-                }
+            if(Array.isArray(this.コメント[n])){
+                this.コメント[n].unshift([text, vpos])
             }
         }
     }
@@ -271,41 +245,20 @@ class jsplayer extends HTMLElement{
         const time = this.$動画.currentTime
         const sec  = Math.floor(time)
         const text = this.$コメント入力.value.trim()
+        const body = new URLSearchParams({vpos:time.toFixed(2), comment:text, file:this.$動画.src})
 
-        if(text === '' || text.length > 64){
+        this.$コメント入力.value = ''
+
+        if(text === '' || text.length > 64 || !this.posturl){
             return
         }
 
-        if(this.himado){
-            const param = {
-                mode     : 'comment',
-                id       : this.himado,
-                vpos     : time.toFixed(2) * 100,
-                comment  : text,
-                mail     : '',
-                group_id : String(this.group_id).split(',')[0],
-                adddate  : Math.floor(Date.now()/1000),
-            }
-
-            const himado_url = `${encodeURIComponent('http://himado.in/api/player?')}${new URLSearchParams(param)}`
-
-            fetch(`http://127.0.0.1/jsplayer/proxy.php?url=${himado_url}`)
-        }
-        else if(this.posturl){
-            const param = {
-                vpos    : time.toFixed(2),
-                comment : text,
-                file    : this.$動画.src,
-            }
-
-            fetch(this.posturl, {method:'POST', body:new URLSearchParams(param)})
-        }
+        fetch(this.posturl, {method:'POST', body})
 
         if(Array.isArray(this.コメント[sec+1])){
             this.コメント[sec+1].unshift([text, time+1])
         }
 
-        this.$コメント入力.value = ''
     }
 
 
@@ -674,27 +627,27 @@ class jsplayer extends HTMLElement{
         return `
         <div id="jsplayer" data-pause>
           <div id="画面" tabindex="1">
-            <span id="OSD"></span>
+            <div id="OSD"></div>
             <video id="動画" loop></video>
           </div>
           <div id="コントローラ">
             <div id="コントローラ枠">
-              <span id="再生ボタン"></span>
-              <span id="現在時間">00:00</span>
+              <div id="再生ボタン"></div>
+              <div id="現在時間">00:00</div>
               <div id="時間調節枠">
                 <div id="時間調節バー">
-                  <span id="時間調節ポインタ"></span>
+                  <div id="時間調節ポインタ"></div>
                 </div>
               </div>
-              <span id="合計時間">00:00</span>
-              <span id="音量ボタン"></span>
+              <div id="合計時間">00:00</div>
+              <div id="音量ボタン"></div>
               <div id="音量調節枠">
                 <div id="音量調節バー">
-                  <span id="音量調節ポインタ"></span>
+                  <div id="音量調節ポインタ"></div>
                 </div>
               </div>
-              <span id="コメント表示ボタン"></span>
-              <span id="全画面ボタン"></span>
+              <div id="コメント表示ボタン"></div>
+              <div id="全画面ボタン"></div>
             </div>
             <form id="フォーム枠" action="javascript:void(0)">
               <input id="コメント入力" type="text" value="" autocomplete="off" spellcheck="false" maxlength="60" tabindex="2" disabled>
