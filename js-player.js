@@ -1,3 +1,13 @@
+/*
+■必須
+$動画_progress
+
+■任意
+全画面中のスタイル
+ポインタ位置 -> 移動したときにプロパティで保存したら？
+*/
+
+
 
 class jsplayer extends HTMLElement{
 
@@ -8,7 +18,7 @@ class jsplayer extends HTMLElement{
         this.設定.音量 = this.設定.音量 || 1
 
         this.$画面.初期幅           = this.csslen(this.$jsplayer, '--画面初期幅')
-        this.$画面.高さ             = this.csslen(this.$画面, 'height')
+        this.$画面.初期高さ         = this.csslen(this.$jsplayer, '--画面初期高さ')
         this.$時間調節バー.横幅     = this.csslen(this.$時間調節バー, 'width')
         this.$時間調節ポインタ.横幅 = this.csslen(this.$時間調節ポインタ, 'width')
         this.$音量調節ポインタ.横幅 = this.csslen(this.$音量調節ポインタ, 'width')
@@ -16,14 +26,14 @@ class jsplayer extends HTMLElement{
         document.addEventListener('fullscreenchange', this.全画面_event)
         window.addEventListener('unload', this.終了)
 
-        this.コメント設定 = this.コメント設定取得(this.$画面.高さ)
+        this.コメント設定 = this.コメント設定取得(this.$画面.初期高さ)
         this.$動画.src    = this.file
         this.$画面.focus()
     }
 
 
     static get observedAttributes(){
-        return ['file', 'comment', 'posturl']
+        return ['file', 'comment', 'post']
     }
 
 
@@ -91,7 +101,7 @@ class jsplayer extends HTMLElement{
         this.$画面.onmousemove = null
 
         if(this.timer){
-            window.clearTimeout(this.timer)
+            clearTimeout(this.timer)
             this.timer = null
         }
 
@@ -102,7 +112,7 @@ class jsplayer extends HTMLElement{
 
         this.$jsplayer.style.setProperty('--画面幅', `${this.$画面.初期幅}px`)
 
-        this.コメント設定 = this.コメント設定取得(this.$画面.高さ)
+        this.コメント設定 = this.コメント設定取得(this.$画面.初期高さ)
         this.コメント全消去()
         this.$画面.focus()
     }
@@ -220,7 +230,7 @@ class jsplayer extends HTMLElement{
 
     コメント取得(){
         if(!this.コメント){
-            this.コメント = Array(Math.floor(this.$動画.duration) + 1).fill([]) //動画時間+1の箱を作る [[],[],[],[]...]
+            this.コメント = Array(Math.floor(this.$動画.duration) + 1).fill([])
         }
         if(!this.comment){
             return
@@ -246,11 +256,11 @@ class jsplayer extends HTMLElement{
 
         this.$コメント入力.value = ''
 
-        if(text === '' || text.length > 64 || !this.posturl){
+        if(text === '' || text.length > 64 || !this.post){
             return
         }
 
-        fetch(this.posturl, {method:'POST', body})
+        fetch(this.post, {method:'POST', body})
 
         if(Array.isArray(this.コメント[sec+1])){
             this.コメント[sec+1].unshift([text, time+1])
@@ -584,9 +594,9 @@ class jsplayer extends HTMLElement{
 
     マウスタイマ_event(event){
         if(this.timer){
-            window.clearTimeout(this.timer)
+            clearTimeout(this.timer)
         }
-        this.timer = window.setTimeout(() => this.$画面.style.cursor = 'none', 2500)
+        this.timer = setTimeout(() => this.$画面.style.cursor = 'none', 2500)
         this.$画面.style.cursor = 'auto'
     }
 
@@ -607,17 +617,17 @@ class jsplayer extends HTMLElement{
 
     csslen(el, property){
         const value = property.startsWith('--') ? getComputedStyle(el).getPropertyValue(property) : getComputedStyle(el)[property]
-        return window.parseInt(value, 10) || 0
+        return parseInt(value, 10) || 0
     }
 
 
     save(name, value){
-        window.localStorage.setItem(name, JSON.stringify(value))
+        localStorage.setItem(name, JSON.stringify(value))
     }
 
 
     load(name){
-        return JSON.parse(window.localStorage.getItem(name) || '{}')
+        return JSON.parse(localStorage.getItem(name) || '{}')
     }
 
 
@@ -661,6 +671,7 @@ class jsplayer extends HTMLElement{
         return `
         #jsplayer{
             --画面初期幅: 960px;
+            --画面初期高さ: 540px;
             --画面幅: var(--画面初期幅);
         }
 
@@ -676,7 +687,7 @@ class jsplayer extends HTMLElement{
 
         #画面{
             width: var(--画面初期幅);
-            height: 540px;
+            height: var(--画面初期高さ);
             background-color: #000;
             overflow: hidden;
             white-space : nowrap;
@@ -924,7 +935,7 @@ function benry(self){ // https://qiita.com/economist/items/6c923c255f6b4b7bbf84
     }
 
     for(const name of Object.getOwnPropertyNames(self.constructor.prototype)){
-        if(name.endsWith('_event')){ // 追加ルーチン
+        if(name.endsWith('_event')){ // 追加コード
             self[name] = self.constructor.prototype[name].bind(self)
             continue
         }
