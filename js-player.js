@@ -7,6 +7,7 @@ class jsplayer extends HTMLElement{
         this.設定      = this.load('jsplayer')
         this.設定.音量 = this.設定.音量 || 1
 
+        this.$画面.初期幅           = this.csslen(this.$jsplayer, '--画面初期幅')
         this.$画面.高さ             = this.csslen(this.$画面, 'height')
         this.$時間調節バー.横幅     = this.csslen(this.$時間調節バー, 'width')
         this.$時間調節ポインタ.横幅 = this.csslen(this.$時間調節ポインタ, 'width')
@@ -77,11 +78,9 @@ class jsplayer extends HTMLElement{
         this.$画面.append(this.$コントローラ)
         this.$コントローラ.style.visibility = 'hidden'
 
-        const {width, height} = this.$画面.getBoundingClientRect()
+        this.$jsplayer.style.setProperty('--画面幅', `${screen.width}px`)
 
-        this.$jsplayer.style.setProperty('--画面幅', `${width}px`)
-
-        this.コメント設定 = this.コメント設定取得(height)
+        this.コメント設定 = this.コメント設定取得(screen.height)
         this.コメント全消去()
         this.$画面.focus()
     }
@@ -101,11 +100,9 @@ class jsplayer extends HTMLElement{
         this.$jsplayer.append(this.$コントローラ)
         this.$コントローラ.style.visibility = 'visible'
 
-        const {width, height} = this.$画面.getBoundingClientRect()
+        this.$jsplayer.style.setProperty('--画面幅', `${this.$画面.初期幅}px`)
 
-        this.$jsplayer.style.setProperty('--画面幅', `${width}px`)
-
-        this.コメント設定 = this.コメント設定取得(height)
+        this.コメント設定 = this.コメント設定取得(this.$画面.高さ)
         this.コメント全消去()
         this.$画面.focus()
     }
@@ -609,7 +606,8 @@ class jsplayer extends HTMLElement{
 
 
     csslen(el, property){
-        return window.parseInt(window.getComputedStyle(el)[property], 10) || 0
+        const value = property.startsWith('--') ? getComputedStyle(el).getPropertyValue(property) : getComputedStyle(el)[property]
+        return window.parseInt(value, 10) || 0
     }
 
 
@@ -662,7 +660,8 @@ class jsplayer extends HTMLElement{
     get css(){
         return `
         #jsplayer{
-            --画面幅: 960px;
+            --画面初期幅: 960px;
+            --画面幅: var(--画面初期幅);
         }
 
         #jsplayer *{
@@ -676,7 +675,7 @@ class jsplayer extends HTMLElement{
         }
 
         #画面{
-            width: var(--画面幅);
+            width: var(--画面初期幅);
             height: 540px;
             background-color: #000;
             overflow: hidden;
@@ -719,7 +718,7 @@ class jsplayer extends HTMLElement{
         }
 
         #コントローラ{
-            width: 960px;
+            width: var(--画面初期幅);
             color: white;
             background: #47494f;
             border-color: #2f3034 #2f3034 #232427;
