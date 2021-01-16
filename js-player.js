@@ -11,7 +11,7 @@ $動画_progress
 
 class jsplayer extends HTMLElement{
 
-    async connectedCallback(){
+    connectedCallback(){
         benry(this)
 
         this.設定      = this.load('jsplayer')
@@ -29,6 +29,12 @@ class jsplayer extends HTMLElement{
         this.コメント設定 = this.コメント設定取得(this.$画面.初期高さ)
         this.$動画.src    = this.file
         this.$画面.focus()
+    }
+
+
+    disconnectedCallback(){
+        document.removeEventListener('fullscreenchange', this.全画面_event)
+        window.removeEventListener('unload', this.終了)
     }
 
 
@@ -222,27 +228,26 @@ class jsplayer extends HTMLElement{
 
 
     コメント全消去(){
-        for(const comment of this.querySelectorAll('.コメント')){
+        for(const comment of this.$画面.querySelectorAll('.コメント')){
             comment.remove()
         }
     }
 
 
     コメント取得(){
-        if(!this.コメント){
-            this.コメント = Array(Math.floor(this.$動画.duration) + 1).fill([])
-        }
-        if(!this.comment){
+        if(this.コメント || !this.comment){
             return
         }
 
-        for(const v of JSON.parse(this.comment)){
-            const text = v[0]
-            const vpos = v[1]
-            const n    = Math.floor(vpos)
+        const limit   = Math.floor(this.$動画.duration) + 1
+ 
+        this.コメント = Array(limit).fill().map(v => [])
 
-            if(Array.isArray(this.コメント[n])){
-                this.コメント[n].unshift([text, vpos])
+        for(const v of JSON.parse(this.comment)){
+            const n = Math.floor(v[1])
+
+            if(n < limit){
+                this.コメント[n].push(v)
             }
         }
     }
@@ -269,11 +274,6 @@ class jsplayer extends HTMLElement{
     }
 
 
-    終了(){
-        this.save('jsplayer', this.設定)
-    }
-
-
 
     $動画_click(event){
         if(!this.$動画.currentTime){
@@ -289,12 +289,11 @@ class jsplayer extends HTMLElement{
 
 
     $動画_loadedmetadata(event){
-        this.コメント取得()
-
         this.$コメント入力.disabled       = false
         this.$コメント投稿ボタン.disabled = false
         this.$合計時間.textContent        = this.時間整形(this.$動画.duration)
         this.音量変更(this.設定.音量)
+        this.コメント取得()
     }
 
 
@@ -598,6 +597,11 @@ class jsplayer extends HTMLElement{
         }
         this.timer = setTimeout(() => this.$画面.style.cursor = 'none', 2500)
         this.$画面.style.cursor = 'auto'
+    }
+
+
+    終了_event(){
+        this.save('jsplayer', this.設定)
     }
 
 
