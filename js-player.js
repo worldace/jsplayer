@@ -42,7 +42,7 @@ class jsplayer extends HTMLElement{
 
 
     時間変更(sec){
-        if(this.$動画.duration){
+        if(this.$動画.readyState){
             this.$動画.currentTime = this.limit(0, Math.floor(sec), this.$動画.duration)
         }
     }
@@ -55,7 +55,7 @@ class jsplayer extends HTMLElement{
 
 
     再生速度変更(speed){
-        if(this.$動画.duration){
+        if(this.$動画.readyState){
             this.$動画.playbackRate = this.limit(0.5, speed.toFixed(1), 3)
         }
     }
@@ -219,7 +219,7 @@ class jsplayer extends HTMLElement{
     コメント投稿(){
         const text = this.$コメント入力.value.trim()
 
-        if(text === '' || !this.post || !this.$動画.duration){
+        if(text === '' || !this.post || !this.$動画.readyState){
             return
         }
 
@@ -348,28 +348,28 @@ class jsplayer extends HTMLElement{
 
 
     $再生ボタン_click(event){
-        if(this.$動画.duration){
+        if(this.$動画.readyState){
             this.$動画.paused ? this.$動画.play() : this.$動画.pause()
         }
     }
 
 
     $シーク枠_click(event){
-        if(this.$動画.duration && !this.$シークポインタ.isDrag){
+        if(this.$動画.readyState && !this.$シークポインタ.isDrag){
             this.時間変更(this.$動画.duration * this.シークポインタ(event.clientX).割合)
         }
     }
 
 
     $シーク枠_wheel(event){
-        if(this.$動画.duration){
+        if(this.$動画.readyState){
             (event.deltaY > 0) ? this.時間変更(this.$動画.currentTime+15) : this.時間変更(this.$動画.currentTime-15)
         }
     }
 
 
     $シークポインタ_mousedown(event){
-        if(this.$動画.duration){
+        if(this.$動画.readyState){
             this.$シークポインタ.isDrag = true
             document.addEventListener('mousemove', this.シークポインタ操作_event)
             document.addEventListener('mouseup', this.シークポインタ操作終了_event, {once:true})
