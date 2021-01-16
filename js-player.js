@@ -1,12 +1,9 @@
-
+// vpos
 
 class jsplayer extends HTMLElement{
 
     connectedCallback(){
         benry(this)
-
-        this.設定      = this.load('jsplayer')
-        this.設定.音量 = this.設定.音量 || 1
 
         this.$画面.初期幅   = this.csslen(this.$jsplayer, '--画面初期幅')
         this.$画面.初期高さ = this.csslen(this.$jsplayer, '--画面初期高さ')
@@ -259,7 +256,6 @@ class jsplayer extends HTMLElement{
         this.$コメント入力.disabled       = false
         this.$コメント投稿ボタン.disabled = false
         this.$合計時間.textContent        = this.時間整形(this.$動画.duration)
-        this.音量変更(this.設定.音量)
         this.コメント取得()
     }
 
@@ -317,7 +313,6 @@ class jsplayer extends HTMLElement{
         }
         else{
             this.$jsplayer.removeAttribute('data-mute')
-            this.設定.音量 = this.$動画.volume
         }
 
         this.$音量ポインタ.style.left = this.音量ポインタ(this.$動画.volume).位置 + 'px'
@@ -584,11 +579,6 @@ class jsplayer extends HTMLElement{
     }
 
 
-    終了_event(){
-        this.save('jsplayer', this.設定)
-    }
-
-
 
     limit(min, val, max){
         if(val < min){
@@ -605,16 +595,6 @@ class jsplayer extends HTMLElement{
 
     csslen(el, property){
         return parseInt(getComputedStyle(el).getPropertyValue(property), 10) || 0
-    }
-
-
-    save(name, value){
-        localStorage.setItem(name, JSON.stringify(value))
-    }
-
-
-    load(name){
-        return JSON.parse(localStorage.getItem(name) || '{}')
     }
 
 
