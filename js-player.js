@@ -9,7 +9,6 @@ class jsplayer extends HTMLElement{
         this.$画面.初期高さ = this.csslen(this.$jsplayer, '--画面初期高さ')
 
         document.addEventListener('fullscreenchange', this.全画面_event)
-        window.addEventListener('unload', this.終了)
 
         this.コメント設定 = this.コメント設定取得(this.$画面.初期高さ)
         this.$動画.src    = this.file
@@ -19,7 +18,6 @@ class jsplayer extends HTMLElement{
 
     disconnectedCallback(){
         document.removeEventListener('fullscreenchange', this.全画面_event)
-        window.removeEventListener('unload', this.終了)
     }
 
 
