@@ -14,10 +14,10 @@ class jsplayer extends HTMLElement{
         this.設定      = this.load('jsplayer')
         this.設定.音量 = this.設定.音量 || 1
 
-        this.$画面.初期幅           = this.csslen(this.$jsplayer, '--画面初期幅')
-        this.$画面.初期高さ         = this.csslen(this.$jsplayer, '--画面初期高さ')
-        this.$時間調節ポインタ.横幅 = this.csslen(this.$時間調節ポインタ, 'width')
-        this.$音量調節ポインタ.横幅 = this.csslen(this.$音量調節ポインタ, 'width')
+        this.$画面.初期幅         = this.csslen(this.$jsplayer, '--画面初期幅')
+        this.$画面.初期高さ       = this.csslen(this.$jsplayer, '--画面初期高さ')
+        this.$シークポインタ.横幅 = this.csslen(this.$シークポインタ, 'width')
+        this.$音量ポインタ.横幅   = this.csslen(this.$音量ポインタ, 'width')
 
         document.addEventListener('fullscreenchange', this.全画面_event)
         window.addEventListener('unload', this.終了)
@@ -72,7 +72,7 @@ class jsplayer extends HTMLElement{
     }
 
 
-    ポインタ位置(current = 0, $ポインタ){ //currentは「割合(0-1)」「クリックされた位置」の2パターンある
+    ポインタ(current = 0, $ポインタ){ //currentは「割合(0-1)」「クリックされた位置」の2パターンある
 
         const {width, left} = $ポインタ.parentNode.getBoundingClientRect()
         const 横幅  = width - $ポインタ.横幅
@@ -263,12 +263,12 @@ class jsplayer extends HTMLElement{
         }
         this.更新時間 = sec
 
-        if(!this.$時間調節ポインタ.isDrag){
+        if(!this.$シークポインタ.isDrag){
             this.$現在時間.textContent = this.時間整形(this.$動画.currentTime)
             this.$合計時間.textContent = this.時間整形(this.$動画.duration)
 
-            const p = this.ポインタ位置(this.$動画.currentTime/this.$動画.duration, this.$時間調節ポインタ)
-            this.$時間調節ポインタ.style.left = p.位置 + 'px'
+            const p = this.ポインタ(this.$動画.currentTime/this.$動画.duration, this.$シークポインタ)
+            this.$シークポインタ.style.left = p.位置 + 'px'
         }
 
         if(!this.$動画.paused && !this.$jsplayer.hasAttribute('data-comment_off')){
@@ -296,7 +296,7 @@ class jsplayer extends HTMLElement{
             }
         }
 
-        //this.$時間調節バー.style.backgroundSize = `${this.bufferMax / this.$動画.duration * 100}%`
+        //this.$シークバー.style.backgroundSize = `${this.bufferMax / this.$動画.duration * 100}%`
     }
 
 
@@ -319,7 +319,7 @@ class jsplayer extends HTMLElement{
             this.設定.音量 = this.$動画.volume
         }
 
-        this.$音量調節ポインタ.style.left = this.ポインタ位置(this.$動画.volume, this.$音量調節ポインタ).位置 + 'px'
+        this.$音量ポインタ.style.left = this.ポインタ(this.$動画.volume, this.$音量ポインタ).位置 + 'px'
     }
 
 
@@ -358,26 +358,26 @@ class jsplayer extends HTMLElement{
     }
 
 
-    $時間調節枠_click(event){
-        if(this.$動画.duration && !this.$時間調節ポインタ.isDrag){
-            const ratio = this.ポインタ位置(event.clientX, this.$時間調節ポインタ).割合
+    $シーク枠_click(event){
+        if(this.$動画.duration && !this.$シークポインタ.isDrag){
+            const ratio = this.ポインタ(event.clientX, this.$シークポインタ).割合
             this.時間変更(this.$動画.duration * ratio)
         }
     }
 
 
-    $時間調節枠_wheel(event){
+    $シーク枠_wheel(event){
         if(this.$動画.duration){
             (event.deltaY > 0) ? this.時間変更(this.$動画.currentTime+15) : this.時間変更(this.$動画.currentTime-15)
         }
     }
 
 
-    $時間調節ポインタ_mousedown(event){
+    $シークポインタ_mousedown(event){
         if(this.$動画.duration){
-            this.$時間調節ポインタ.isDrag = true
-            document.addEventListener('mousemove', this.時間調節ポインタ操作_event)
-            document.addEventListener('mouseup', this.時間調節ポインタ操作終了_event, {once:true})
+            this.$シークポインタ.isDrag = true
+            document.addEventListener('mousemove', this.シークポインタ操作_event)
+            document.addEventListener('mouseup', this.シークポインタ操作終了_event, {once:true})
         }
     }
 
@@ -396,24 +396,24 @@ class jsplayer extends HTMLElement{
     }
 
 
-    $音量調節枠_click(event){
-        if(!this.$音量調節ポインタ.isDrag){
+    $音量枠_click(event){
+        if(!this.$音量ポインタ.isDrag){
             this.$動画.muted = false
-            this.音量変更(this.ポインタ位置(event.clientX, this.$音量調節ポインタ).割合)
+            this.音量変更(this.ポインタ(event.clientX, this.$音量ポインタ).割合)
         }
     }
 
 
-    $音量調節枠_wheel(event){
+    $音量枠_wheel(event){
         (event.deltaY > 0) ? this.音量変更(this.$動画.volume+0.1) : this.音量変更(this.$動画.volume-0.1)
     }
 
 
-    $音量調節ポインタ_mousedown(event){
-        this.$音量調節ポインタ.isDrag = true
+    $音量ポインタ_mousedown(event){
+        this.$音量ポインタ.isDrag = true
 
-        document.addEventListener('mousemove', this.音量調節ポインタ操作_event)
-        document.addEventListener('mouseup', this.音量調節ポインタ操作終了_event, {once:true})
+        document.addEventListener('mousemove', this.音量ポインタ操作_event)
+        document.addEventListener('mouseup', this.音量ポインタ操作終了_event, {once:true})
     }
 
 
@@ -501,31 +501,31 @@ class jsplayer extends HTMLElement{
 
 
 
-    時間調節ポインタ操作_event(event){
-        const ポインタ = this.ポインタ位置(event.clientX, this.$時間調節ポインタ)
+    シークポインタ操作_event(event){
+        const ポインタ = this.ポインタ(event.clientX, this.$シークポインタ)
         this.$現在時間.textContent        = this.時間整形(this.$動画.duration * ポインタ.割合)
-        this.$時間調節ポインタ.style.left = ポインタ.位置 + 'px'
+        this.$シークポインタ.style.left = ポインタ.位置 + 'px'
     }
 
 
-    時間調節ポインタ操作終了_event(event){
-        document.removeEventListener('mousemove', this.時間調節ポインタ操作_event)
-        this.$時間調節ポインタ.isDrag = false
+    シークポインタ操作終了_event(event){
+        document.removeEventListener('mousemove', this.シークポインタ操作_event)
+        this.$シークポインタ.isDrag = false
 
-        const ポインタ = this.ポインタ位置(event.clientX, this.$時間調節ポインタ)
+        const ポインタ = this.ポインタ(event.clientX, this.$シークポインタ)
         this.時間変更(this.$動画.duration * ポインタ.割合)
     }
 
 
-    音量調節ポインタ操作_event(event){
-        this.音量変更(this.ポインタ位置(event.clientX, this.$音量調節ポインタ).割合)
+    音量ポインタ操作_event(event){
+        this.音量変更(this.ポインタ(event.clientX, this.$音量ポインタ).割合)
     }
 
 
-    音量調節ポインタ操作終了_event(event){
-        document.removeEventListener('mousemove', this.音量調節ポインタ操作_event)
+    音量ポインタ操作終了_event(event){
+        document.removeEventListener('mousemove', this.音量ポインタ操作_event)
 
-        this.$音量調節ポインタ.isDrag = false
+        this.$音量ポインタ.isDrag = false
     }
 
 
@@ -630,16 +630,16 @@ class jsplayer extends HTMLElement{
             <div id="コントローラ枠">
               <div id="再生ボタン"></div>
               <div id="現在時間">00:00</div>
-              <div id="時間調節枠">
-                <div id="時間調節バー">
-                  <div id="時間調節ポインタ"></div>
+              <div id="シーク枠">
+                <div id="シークバー">
+                  <div id="シークポインタ"></div>
                 </div>
               </div>
               <div id="合計時間">00:00</div>
               <div id="音量ボタン"></div>
-              <div id="音量調節枠">
-                <div id="音量調節バー">
-                  <div id="音量調節ポインタ"></div>
+              <div id="音量枠">
+                <div id="音量バー">
+                  <div id="音量ポインタ"></div>
                 </div>
               </div>
               <div id="コメント表示ボタン"></div>
@@ -799,23 +799,23 @@ class jsplayer extends HTMLElement{
             background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTc5MiIgaGVpZ2h0PSIxNzkyIiB2aWV3Qm94PSIwIDAgMTc5MiAxNzkyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0xMTUyIDg5NnEwLTEwNi03NS0xODF0LTE4MS03NS0xODEgNzUtNzUgMTgxIDc1IDE4MSAxODEgNzUgMTgxLTc1IDc1LTE4MXptNTEyLTEwOXYyMjJxMCAxMi04IDIzdC0yMCAxM2wtMTg1IDI4cS0xOSA1NC0zOSA5MSAzNSA1MCAxMDcgMTM4IDEwIDEyIDEwIDI1dC05IDIzcS0yNyAzNy05OSAxMDh0LTk0IDcxcS0xMiAwLTI2LTlsLTEzOC0xMDhxLTQ0IDIzLTkxIDM4LTE2IDEzNi0yOSAxODYtNyAyOC0zNiAyOGgtMjIycS0xNCAwLTI0LjUtOC41dC0xMS41LTIxLjVsLTI4LTE4NHEtNDktMTYtOTAtMzdsLTE0MSAxMDdxLTEwIDktMjUgOS0xNCAwLTI1LTExLTEyNi0xMTQtMTY1LTE2OC03LTEwLTctMjMgMC0xMiA4LTIzIDE1LTIxIDUxLTY2LjV0NTQtNzAuNXEtMjctNTAtNDEtOTlsLTE4My0yN3EtMTMtMi0yMS0xMi41dC04LTIzLjV2LTIyMnEwLTEyIDgtMjN0MTktMTNsMTg2LTI4cTE0LTQ2IDM5LTkyLTQwLTU3LTEwNy0xMzgtMTAtMTItMTAtMjQgMC0xMCA5LTIzIDI2LTM2IDk4LjUtMTA3LjV0OTQuNS03MS41cTEzIDAgMjYgMTBsMTM4IDEwN3E0NC0yMyA5MS0zOCAxNi0xMzYgMjktMTg2IDctMjggMzYtMjhoMjIycTE0IDAgMjQuNSA4LjV0MTEuNSAyMS41bDI4IDE4NHE0OSAxNiA5MCAzN2wxNDItMTA3cTktOSAyNC05IDEzIDAgMjUgMTAgMTI5IDExOSAxNjUgMTcwIDcgOCA3IDIyIDAgMTItOCAyMy0xNSAyMS01MSA2Ni41dC01NCA3MC41cTI2IDUwIDQxIDk4bDE4MyAyOHExMyAyIDIxIDEyLjV0OCAyMy41eiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==");
         }
 
-        #時間調節枠,
-        #音量調節枠{
+        #シーク枠,
+        #音量枠{
             margin: 0 5px;
             padding: 0;
             height: 20px;
         }
 
-        #時間調節枠{
+        #シーク枠{
             flex-grow: 1;
         }
 
-        #音量調節枠{
+        #音量枠{
             width: 100px;
         }
 
-        #時間調節バー,
-        #音量調節バー{
+        #シークバー,
+        #音量バー{
             position: relative;
             height: 5px;
             margin: 0 0 8px 0;
@@ -826,15 +826,15 @@ class jsplayer extends HTMLElement{
             top: 7px;
         }
 
-        #時間調節バー{
+        #シークバー{
             background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAICAIAAABcT7kVAAAAFUlEQVQI12N0WX+DgYGBiYGBgSQKAGI2AdswIf1pAAAAAElFTkSuQmCC");
             background-repeat: no-repeat;
             background-position: 0;
             background-size : 0;
         }
 
-        #時間調節ポインタ,
-        #音量調節ポインタ{
+        #シークポインタ,
+        #音量ポインタ{
             position: absolute;
             cursor: pointer;
             width: 10px;
@@ -847,7 +847,7 @@ class jsplayer extends HTMLElement{
             border-radius: 3px;
         }
 
-        #音量調節ポインタ{
+        #音量ポインタ{
             left: calc(100% - 10px);
         }
 
