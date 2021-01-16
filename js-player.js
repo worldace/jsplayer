@@ -1,4 +1,5 @@
 // vpos
+// benry EventTarget
 
 class jsplayer extends HTMLElement{
 
@@ -8,16 +9,9 @@ class jsplayer extends HTMLElement{
         this.$画面.初期幅   = this.csslen(this.$jsplayer, '--画面初期幅')
         this.$画面.初期高さ = this.csslen(this.$jsplayer, '--画面初期高さ')
 
-        document.addEventListener('fullscreenchange', this.全画面_event)
-
         this.コメント設定 = this.コメント設定取得(this.$画面.初期高さ)
         this.$動画.src    = this.file
         this.$画面.focus()
-    }
-
-
-    disconnectedCallback(){
-        document.removeEventListener('fullscreenchange', this.全画面_event)
     }
 
 
@@ -422,7 +416,7 @@ class jsplayer extends HTMLElement{
 
 
     $全画面ボタン_click(event){
-        (document.fullscreenElement === this) ? document.exitFullscreen() : this.$画面.requestFullscreen()
+        (document.fullscreenElement) ? document.exitFullscreen() : this.$画面.requestFullscreen()
     }
 
 
@@ -493,36 +487,8 @@ class jsplayer extends HTMLElement{
     }
 
 
-
-    シークポインタ操作_event(event){
-        const ポインタ = this.シークポインタ(event.clientX)
-        this.$現在時間.textContent      = this.時間整形(this.$動画.duration * ポインタ.割合)
-        this.$シークポインタ.style.left = ポインタ.位置 + 'px'
-    }
-
-
-    シークポインタ操作終了_event(event){
-        document.removeEventListener('mousemove', this.シークポインタ操作_event)
-        this.$シークポインタ.isDrag = false
-
-        this.時間変更(this.$動画.duration * this.シークポインタ(event.clientX).割合)
-    }
-
-
-    音量ポインタ操作_event(event){
-        this.音量変更(this.音量ポインタ(event.clientX).割合)
-    }
-
-
-    音量ポインタ操作終了_event(event){
-        document.removeEventListener('mousemove', this.音量ポインタ操作_event)
-
-        this.$音量ポインタ.isDrag = false
-    }
-
-
-    全画面_event(event){
-        if(document.fullscreenElement === this){
+    $_fullscreenchange(event){
+        if(document.fullscreenElement){
             this.$画面.onmousedown  = this.コントローラ切り替え_event
             this.$画面.onmousemove  = this.マウスタイマ_event
 
@@ -555,6 +521,34 @@ class jsplayer extends HTMLElement{
             this.コメント全消去()
             this.$画面.focus()
         }
+    }
+
+
+
+    シークポインタ操作_event(event){
+        const ポインタ = this.シークポインタ(event.clientX)
+        this.$現在時間.textContent      = this.時間整形(this.$動画.duration * ポインタ.割合)
+        this.$シークポインタ.style.left = ポインタ.位置 + 'px'
+    }
+
+
+    シークポインタ操作終了_event(event){
+        document.removeEventListener('mousemove', this.シークポインタ操作_event)
+        this.$シークポインタ.isDrag = false
+
+        this.時間変更(this.$動画.duration * this.シークポインタ(event.clientX).割合)
+    }
+
+
+    音量ポインタ操作_event(event){
+        this.音量変更(this.音量ポインタ(event.clientX).割合)
+    }
+
+
+    音量ポインタ操作終了_event(event){
+        document.removeEventListener('mousemove', this.音量ポインタ操作_event)
+
+        this.$音量ポインタ.isDrag = false
     }
 
 
