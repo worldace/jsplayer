@@ -1,8 +1,3 @@
-/*
-全画面中のスタイル
-buffer
-*/
-
 
 
 class jsplayer extends HTMLElement{
@@ -85,6 +80,18 @@ class jsplayer extends HTMLElement{
         const 位置  = (current <= 1) ? current*横幅 : current-left
 
         return {'位置':this.limit(0, 位置, 横幅), '割合':this.limit(0, 位置/横幅, 1)}
+    }
+
+
+    シークバッファ表示(){
+        const buffer = this.$動画.buffered
+
+        for(let i = 0; i < buffer.length; i++){
+            if(buffer.end(i) > this.bufferMax){
+                this.bufferMax = buffer.end(i)
+                this.$シークバー.style.backgroundSize = `${this.bufferMax / this.$動画.duration * 100}% 100%`
+            }
+        }
     }
 
 
@@ -279,6 +286,8 @@ class jsplayer extends HTMLElement{
         if(!this.$動画.paused && !this.$jsplayer.hasAttribute('data-comment_off')){
             this.コメント放流(this.コメント[sec])
         }
+
+        this.シークバッファ表示()
     }
 
 
@@ -289,19 +298,6 @@ class jsplayer extends HTMLElement{
 
     $動画_pause(event){
         this.$jsplayer.setAttribute('data-pause', '')
-    }
-
-
-    $動画_progress(event){
-        const buffer = this.$動画.buffered
-
-        for(let i = 0; i < buffer.length; i++){
-            if(buffer.end(i) > this.bufferMax){
-                this.bufferMax = buffer.end(i)
-            }
-        }
-
-        //this.$シークバー.style.backgroundSize = `${this.bufferMax / this.$動画.duration * 100}%`
     }
 
 
