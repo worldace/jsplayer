@@ -1,6 +1,6 @@
 /*
 全画面中のスタイル
-ポインタ位置
+ポインタ cssは 音量 calc(100%-10px)
 buffer
 */
 
@@ -72,8 +72,17 @@ class jsplayer extends HTMLElement{
     }
 
 
-    ポインタ(current = 0, $ポインタ){ //currentは「割合(0-1)」「クリックされた位置」の2パターンある
+    シークポインタ(current = 0){
+        return this.ポインタ(current, this.$シークポインタ)
+    }
 
+
+    音量ポインタ(current = 0){
+        return this.ポインタ(current, this.$音量ポインタ)
+    }
+
+
+    ポインタ(current, $ポインタ){ //currentは「割合(0-1)」「クリックされた位置」の2パターンある
         const {width, left} = $ポインタ.parentNode.getBoundingClientRect()
         const 横幅  = width - $ポインタ.横幅
         const 位置  = (current <= 1) ? current*横幅 : current-left
@@ -267,8 +276,7 @@ class jsplayer extends HTMLElement{
             this.$現在時間.textContent = this.時間整形(this.$動画.currentTime)
             this.$合計時間.textContent = this.時間整形(this.$動画.duration)
 
-            const p = this.ポインタ(this.$動画.currentTime/this.$動画.duration, this.$シークポインタ)
-            this.$シークポインタ.style.left = p.位置 + 'px'
+            this.$シークポインタ.style.left = this.シークポインタ(this.$動画.currentTime/this.$動画.duration).位置 + 'px'
         }
 
         if(!this.$動画.paused && !this.$jsplayer.hasAttribute('data-comment_off')){
@@ -319,7 +327,7 @@ class jsplayer extends HTMLElement{
             this.設定.音量 = this.$動画.volume
         }
 
-        this.$音量ポインタ.style.left = this.ポインタ(this.$動画.volume, this.$音量ポインタ).位置 + 'px'
+        this.$音量ポインタ.style.left = this.音量ポインタ(this.$動画.volume).位置 + 'px'
     }
 
 
@@ -360,8 +368,7 @@ class jsplayer extends HTMLElement{
 
     $シーク枠_click(event){
         if(this.$動画.duration && !this.$シークポインタ.isDrag){
-            const ratio = this.ポインタ(event.clientX, this.$シークポインタ).割合
-            this.時間変更(this.$動画.duration * ratio)
+            this.時間変更(this.$動画.duration * this.シークポインタ(event.clientX).割合)
         }
     }
 
@@ -399,7 +406,7 @@ class jsplayer extends HTMLElement{
     $音量枠_click(event){
         if(!this.$音量ポインタ.isDrag){
             this.$動画.muted = false
-            this.音量変更(this.ポインタ(event.clientX, this.$音量ポインタ).割合)
+            this.音量変更(this.音量ポインタ(event.clientX).割合)
         }
     }
 
@@ -502,8 +509,8 @@ class jsplayer extends HTMLElement{
 
 
     シークポインタ操作_event(event){
-        const ポインタ = this.ポインタ(event.clientX, this.$シークポインタ)
-        this.$現在時間.textContent        = this.時間整形(this.$動画.duration * ポインタ.割合)
+        const ポインタ = this.シークポインタ(event.clientX)
+        this.$現在時間.textContent      = this.時間整形(this.$動画.duration * ポインタ.割合)
         this.$シークポインタ.style.left = ポインタ.位置 + 'px'
     }
 
@@ -512,13 +519,12 @@ class jsplayer extends HTMLElement{
         document.removeEventListener('mousemove', this.シークポインタ操作_event)
         this.$シークポインタ.isDrag = false
 
-        const ポインタ = this.ポインタ(event.clientX, this.$シークポインタ)
-        this.時間変更(this.$動画.duration * ポインタ.割合)
+        this.時間変更(this.$動画.duration * this.シークポインタ(event.clientX).割合)
     }
 
 
     音量ポインタ操作_event(event){
-        this.音量変更(this.ポインタ(event.clientX, this.$音量ポインタ).割合)
+        this.音量変更(this.音量ポインタ(event.clientX).割合)
     }
 
 
