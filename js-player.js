@@ -86,49 +86,6 @@ class jsplayer extends HTMLElement{
     }
 
 
-    全画面開始(){
-        this.$画面.onmousedown  = this.コントローラ切り替え_event
-        this.$画面.onmousemove  = this.マウスタイマ_event
-        this.$画面.style.cursor = 'none'
-
-        this.$画面.append(this.$コントローラ)
-        this.$コントローラ.style.visibility = 'hidden'
-
-        this.$jsplayer.style.setProperty('--画面幅', `${screen.width}px`)
-
-        this.コメント設定 = this.コメント設定取得(screen.height)
-        this.コメント全消去()
-        this.$画面.focus()
-    }
-
-
-    全画面終了(){
-        this.$画面.onmousedown = null
-        this.$画面.onmousemove = null
-
-        if(this.timer){
-            clearTimeout(this.timer)
-            this.timer = null
-        }
-
-        this.$画面.style.cursor = 'auto'
-
-        this.$jsplayer.append(this.$コントローラ)
-        this.$コントローラ.style.visibility = 'visible'
-
-        this.$jsplayer.style.setProperty('--画面幅', `${this.$画面.初期幅}px`)
-
-        this.コメント設定 = this.コメント設定取得(this.$画面.初期高さ)
-        this.コメント全消去()
-        this.$画面.focus()
-    }
-
-
-    全画面切り替え(){
-        (document.fullscreenElement === this) ? document.exitFullscreen() : this.$画面.requestFullscreen()
-    }
-
-
     OSD表示(str){
         const osd          = document.createElement('div')
         osd.textContent    = str
@@ -239,7 +196,7 @@ class jsplayer extends HTMLElement{
             return
         }
 
-        const limit   = Math.floor(this.$動画.duration) + 1
+        const limit = Math.floor(this.$動画.duration) + 1
  
         this.コメント = Array(limit).fill().map(v => [])
 
@@ -476,7 +433,7 @@ class jsplayer extends HTMLElement{
 
 
     $全画面ボタン_click(event){
-        this.全画面切り替え()
+        (document.fullscreenElement === this) ? document.exitFullscreen() : this.$画面.requestFullscreen()
     }
 
 
@@ -504,7 +461,7 @@ class jsplayer extends HTMLElement{
             this.$コメント入力.focus()
         }
         else if(event.which == 13 && event.ctrlKey){ //Ctrl+Enter
-            this.全画面切り替え()
+            this.$全画面ボタン.click()
         }
         else if(event.which == 13){ //Enter
             this.$動画.paused ? this.$動画.play() : this.$動画.pause()
@@ -577,7 +534,39 @@ class jsplayer extends HTMLElement{
 
 
     全画面_event(event){
-        (document.fullscreenElement === this) ? this.全画面開始() : this.全画面終了()
+        if(document.fullscreenElement === this){
+            this.$画面.onmousedown  = this.コントローラ切り替え_event
+            this.$画面.onmousemove  = this.マウスタイマ_event
+
+            this.$画面.append(this.$コントローラ)
+            this.$コントローラ.style.visibility = 'hidden'
+            this.$画面.style.cursor = 'none'
+
+            this.$jsplayer.style.setProperty('--画面幅', `${screen.width}px`)
+
+            this.コメント設定 = this.コメント設定取得(screen.height)
+            this.コメント全消去()
+            this.$画面.focus()
+        }
+        else{
+            this.$画面.onmousedown  = null
+            this.$画面.onmousemove  = null
+
+            if(this.timer){
+                clearTimeout(this.timer)
+                this.timer = null
+            }
+
+            this.$jsplayer.append(this.$コントローラ)
+            this.$コントローラ.style.visibility = 'visible'
+            this.$画面.style.cursor = 'auto'
+
+            this.$jsplayer.style.setProperty('--画面幅', `${this.$画面.初期幅}px`)
+
+            this.コメント設定 = this.コメント設定取得(this.$画面.初期高さ)
+            this.コメント全消去()
+            this.$画面.focus()
+        }
     }
 
 
