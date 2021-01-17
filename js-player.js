@@ -1,4 +1,3 @@
-// vpos
 // benry EventTarget
 
 class jsplayer extends HTMLElement{
@@ -199,10 +198,10 @@ class jsplayer extends HTMLElement{
         this.コメント = Array(max).fill().map(v => [])
 
         for(const v of JSON.parse(this.comment)){
-            const n = Math.floor(v[1])
+            const n = Math.floor(v[1]/100)
 
             if(n < max){
-                this.コメント[n].unshift(v)
+                this.コメント[n].unshift([v[0], v[1]/100])
             }
         }
     }
@@ -217,7 +216,7 @@ class jsplayer extends HTMLElement{
 
         const time = this.$動画.currentTime
         const sec  = Math.floor(time)
-        const body = new URLSearchParams({vpos:time.toFixed(2), comment:text, file:this.$動画.src})
+        const body = new URLSearchParams({vpos:time.toFixed(2).replace('.',''), comment:text, file:this.$動画.src})
 
         fetch(this.post, {method:'POST', body})
 
@@ -535,7 +534,6 @@ class jsplayer extends HTMLElement{
     シークポインタ操作終了_event(event){
         document.removeEventListener('mousemove', this.シークポインタ操作_event)
         this.$シークポインタ.isDrag = false
-
         this.時間変更(this.$動画.duration * this.シークポインタ(event.clientX).割合)
     }
 
@@ -547,7 +545,6 @@ class jsplayer extends HTMLElement{
 
     音量ポインタ操作終了_event(event){
         document.removeEventListener('mousemove', this.音量ポインタ操作_event)
-
         this.$音量ポインタ.isDrag = false
     }
 
