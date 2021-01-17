@@ -1,4 +1,5 @@
 // benry EventTarget
+// maxlength
 
 class jsplayer extends HTMLElement{
 
@@ -197,7 +198,7 @@ class jsplayer extends HTMLElement{
 
         for(const v of JSON.parse(this.comment)){
             const n = Math.floor(v[1]/100)
-            this.コメント[n]?.unshift([v[0], v[1]/100])
+            this.コメント[n]?.push([v[0].substring(0,50), v[1]/100])
         }
     }
 
@@ -603,7 +604,7 @@ class jsplayer extends HTMLElement{
               <div id="全画面ボタン"></div>
             </div>
             <form id="フォーム枠" action="javascript:void(0)">
-              <input id="コメント入力" type="text" value="" autocomplete="off" spellcheck="false" maxlength="60" tabindex="2" disabled>
+              <input id="コメント入力" type="text" value="" autocomplete="off" spellcheck="false" maxlength="50" tabindex="2" disabled>
               <input id="コメント投稿ボタン" type="submit" value="コメントする" disabled>
             </form>
           </div>

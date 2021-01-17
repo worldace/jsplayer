@@ -1,0 +1,137 @@
+■jsplayer 2021年版
+
+コメントを流せる動画プレイヤー。WEBコンポーネント製
+
+
+■設置方法
+
+
+1. プログラムをダウンロードする
+https://github.com/worldace/jsplayer/archive/master.zip
+
+
+2. js-player.js をアップする
+
+
+3. スクリプトを読み込むタグを記述する。scriptタグはどこに記述してもOKですが、type属性が必要です
+
+<script src="js-player.js" type="module"></script>
+
+
+4. js-playerタグを記述するとプレイヤーが表示されます。閉じタグは必須です
+
+<js-player file="動画ファイルのURL"></js-player>
+
+
+
+■2021年版と旧版との違い
+
+
+- IE非対応
+- 設置方法が変更
+- コメント入出力の仕様が変更
+- ひま動のコメントを直接扱わなくなった
+
+
+旧版のダウンロード
+https://github.com/worldace/jsplayer/archive/6b4b8de07ae8beeeeea3978bf93635daa1970ae5.zip
+
+
+
+■コメント機能
+
+コメントを使う場合は、コメントの入出力機能を自作する必要があります。
+プログラミングの知識が必要です。
+
+
+★コメントの投稿
+
+1. js-playerタグのpost属性にコメント投稿先のURLを入力する
+
+<js-player post="コメント投稿先URL" file="..">
+
+
+2. コメントはそのURLに対してPOSTされ、次の3つのキーが送信されます。
+
+---------------------------------------------------------------------------------------------------
+text   : コメント本文
+---------------------------------------------------------------------------------------------------
+vpos   : コメントが投稿された動画内時間(小数点第三位を四捨五入して100倍した整数)
+---------------------------------------------------------------------------------------------------
+file   : 動画ファイルのURL(file属性の値)
+---------------------------------------------------------------------------------------------------
+
+
+★コメントの読み込み
+
+1. js-playerタグのcomment属性に「コメント一覧をエンコードした文字列」を入力する
+
+<js-player comment="エンコード済みの文字列" file="..">
+
+※コメント一覧のデータ構造とエンコード方法は、次のPHPコードを参考にしてください
+
+$コメント一覧   = [[本文,時間],[本文,時間],[本文,時間]]; //新しい順
+$エンコード済み = htmlspecialchars(json_encode($コメント一覧));
+
+
+
+
+■ひま動
+
+jsplayerはひま動のコメントを扱わなくなりました。
+
+ひま動からコメントを取得したい場合は、各自で取得してjsplayerに渡してください。
+ひま動へコメント投稿したい場合は、jsplayerからの投稿を各自で再投稿してください。
+
+PHPのサンプルコードを用意したので、参考に各自実装してください。
+
+-----------------------------------------
+
+$id       : ひま動の動画ID。動画ページのURLに含まれる文字
+$key      : ひま動のkey。動画ページのソースを「name="key"」で検索して、そのvalue値
+$group_id : ひま動のgroup_id。 動画ページのソースを「name="group_id"」で検索して、そのvalue値
+$text     : jsplayerが送信したPOSTのtext
+$vpos     : jsplayerが送信したPOSTのvpos
+
+
+function himado_get($id, $group_id, $key){
+    $comment = [];
+
+    $url = 'http://himado.in/?' . http_build_query([
+        'id'       => $id,
+        'group_id' => $group_id,
+        'key'      => $key,
+        'mode'     =>'comment',
+        'format'   => 'nico',
+        'limit'    => 10000,
+        'nocache'  => time()
+    ]);
+
+    $xml = file_get_contents($url);
+
+    if(!$xml or !preg_match('|^<p|', $xml)){
+        return;
+    }
+
+    foreach(simplexml_load_string($xml) as $v){
+        $comment[] = [(string)$v, (int)$v['vpos']];
+    }
+
+    return htmlspecialchars(json_encode($comment));
+}
+
+
+
+function himado_post($id, $group_id, $text, $vpos){
+    $url = 'http://himado.in/api/player?' . http_build_query([
+        'id'       => $id,
+        'group_id' => $group_id,
+        'comment'  => $text,
+        'vpos'     => $vpos,
+        'mode'     => 'comment',
+        'mail'     => '',
+        'adddate'  => time()
+    ]);
+
+    file_get_contents($url);
+}
