@@ -89,7 +89,7 @@ class jsplayer extends HTMLElement{
         osd.id             = 'OSD'
         osd.style.fontSize = `${this.コメント設定.文字サイズ}px`
 
-        this.$.getElementById('OSD').replaceWith(osd)
+        this.$画面.querySelector('#OSD').replaceWith(osd)
     }
 
 
@@ -193,16 +193,11 @@ class jsplayer extends HTMLElement{
             return
         }
 
-        const max = Math.floor(this.$動画.duration) + 1
- 
-        this.コメント = Array(max).fill().map(v => [])
+        this.コメント = Array(Math.floor(this.$動画.duration+1)).fill().map(v => [])
 
         for(const v of JSON.parse(this.comment)){
             const n = Math.floor(v[1]/100)
-
-            if(n < max){
-                this.コメント[n].unshift([v[0], v[1]/100])
-            }
+            this.コメント[n]?.unshift([v[0], v[1]/100])
         }
     }
 
@@ -216,14 +211,12 @@ class jsplayer extends HTMLElement{
 
         const time = this.$動画.currentTime
         const sec  = Math.floor(time)
-        const body = new URLSearchParams({vpos:time.toFixed(2).replace('.',''), comment:text, file:this.$動画.src})
+        const body = new URLSearchParams({text, vpos:time.toFixed(2).replace('.',''), file:this.$動画.src})
 
         fetch(this.post, {method:'POST', body})
 
-        if(Array.isArray(this.コメント[sec+1])){
-            this.コメント[sec+1].unshift([text, time+1])
-        }
- 
+        this.コメント[sec+1]?.unshift([text, time+1])
+
         this.$コメント入力.value = ''
     }
 
@@ -505,10 +498,8 @@ class jsplayer extends HTMLElement{
             this.$画面.onmousedown  = null
             this.$画面.onmousemove  = null
 
-            if(this.timer){
-                clearTimeout(this.timer)
-                this.timer = null
-            }
+            clearTimeout(this.timer)
+            this.timer = null
 
             this.$jsplayer.append(this.$コントローラ)
             this.$コントローラ.style.visibility = 'visible'
@@ -560,9 +551,7 @@ class jsplayer extends HTMLElement{
 
 
     マウスタイマ_event(event){
-        if(this.timer){
-            clearTimeout(this.timer)
-        }
+        clearTimeout(this.timer)
         this.timer = setTimeout(() => this.$画面.style.cursor = 'none', 2500)
         this.$画面.style.cursor = 'auto'
     }
