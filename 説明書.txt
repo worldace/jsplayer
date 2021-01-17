@@ -6,21 +6,19 @@
 ■設置方法
 
 
-1. プログラムをダウンロードする
-https://github.com/worldace/jsplayer/archive/master.zip
+1.  プログラムをダウンロードしたら、js-player.js をアップします
+    https://github.com/worldace/jsplayer/archive/master.zip
 
 
-2. js-player.js をアップする
+2.  スクリプトを読み込むタグを記述する。scriptタグはどこに記述してもOKですが、type属性が必要です
+
+    <script src="js-player.js" type="module"></script>
 
 
-3. スクリプトを読み込むタグを記述する。scriptタグはどこに記述してもOKですが、type属性が必要です
+3.  js-playerタグを記述するとプレイヤーが表示されます。閉じタグは必須です
+    file属性に動画ファイルのURLを指定してください。
 
-<script src="js-player.js" type="module"></script>
-
-
-4. js-playerタグを記述するとプレイヤーが表示されます。閉じタグは必須です
-
-<js-player file="動画ファイルのURL"></js-player>
+   <js-player file="動画ファイルのURL"></js-player>
 
 
 
