@@ -481,6 +481,8 @@ class jsplayer extends HTMLElement{
 
 
     $_fullscreenchange(event){
+        event.stopPropagation()
+
         if(document.fullscreenElement){
             this.$画面.onmousedown  = this.コントローラ切り替え_event
             this.$画面.onmousemove  = this.マウスタイマ_event

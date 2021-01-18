@@ -86,8 +86,8 @@ PHPのサンプルコードを用意したので、参考に各自実装して�
 -----------------------------------------
 
 $id       : ひま動の動画ID。動画ページのURLに含まれる文字
-$key      : ひま動のkey。動画ページのソースを「name="key"」で検索して、そのvalue値
 $group_id : ひま動のgroup_id。 動画ページのソースを「name="group_id"」で検索して、そのvalue値
+$key      : ひま動のkey。動画ページのソースを「name="key"」で検索して、そのvalue値
 
 function himado_get($id, $group_id, $key){
     $comment = [];
@@ -117,8 +117,8 @@ function himado_get($id, $group_id, $key){
 
 
 
-$text     : jsplayerが送信したPOSTのtext
-$vpos     : jsplayerが送信したPOSTのvpos
+$text : jsplayerが送信したPOSTのtext
+$vpos : jsplayerが送信したPOSTのvpos
 
 function himado_post($id, $group_id, $text, $vpos){
     $url = 'http://himado.in/api/player?' . http_build_query([
