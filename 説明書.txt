@@ -42,7 +42,7 @@ https://github.com/worldace/jsplayer/archive/6b4b8de07ae8beeeeea3978bf93635daa19
 プログラミングの知識が必要です。
 
 
-★コメントの投稿
+★コメントの書き込み
 
 1. js-playerタグのpost属性にコメント投稿先のURLを入力する
 
@@ -88,9 +88,6 @@ PHPのサンプルコードを用意したので、参考に各自実装して�
 $id       : ひま動の動画ID。動画ページのURLに含まれる文字
 $key      : ひま動のkey。動画ページのソースを「name="key"」で検索して、そのvalue値
 $group_id : ひま動のgroup_id。 動画ページのソースを「name="group_id"」で検索して、そのvalue値
-$text     : jsplayerが送信したPOSTのtext
-$vpos     : jsplayerが送信したPOSTのvpos
-
 
 function himado_get($id, $group_id, $key){
     $comment = [];
@@ -119,6 +116,9 @@ function himado_get($id, $group_id, $key){
 }
 
 
+
+$text     : jsplayerが送信したPOSTのtext
+$vpos     : jsplayerが送信したPOSTのvpos
 
 function himado_post($id, $group_id, $text, $vpos){
     $url = 'http://himado.in/api/player?' . http_build_query([
