@@ -96,7 +96,7 @@ class jsplayer extends HTMLElement{
 
     コメント遅延(time, duration){
         const delay = time - duration
-        return (delay > 0) ? `${delay.toFixed(3)*1000}ms` : '1ms'
+        return (delay > 0) ? `${delay.toFixed(3)*1000}ms` : '0ms'
     }
 
 
@@ -140,19 +140,18 @@ class jsplayer extends HTMLElement{
             return
         }
 
-        const lane     = this.コメントレーン()
         const fragment = document.createDocumentFragment()
-        let   number   = 0
+        let   n        = 0
 
-        for(const i of lane.keys()){
-            if(!(number in comment)){
+        for(const [i, v] of this.コメントレーン().entries()){
+            if(!comment[n]){
                 break
             }
-            if(lane[i] === false){
+            if(v === false){
                 continue
             }
-            fragment.append(this.コメント描画(comment[number], i))
-            number++
+            fragment.append(this.コメント描画(comment[n], i))
+            n++
         }
 
         this.$画面.prepend(fragment)
@@ -163,18 +162,14 @@ class jsplayer extends HTMLElement{
         const レーン = Array(this.コメント設定.レーン数).fill(true)
         const 画面   = this.$画面.getBoundingClientRect()
 
-        for(const comment of Array.from(this.$画面.children)){
-            if(comment.className !== 'コメント'){
-                continue
-            }
-
+        for(const comment of this.$画面.querySelectorAll('.コメント')){
             const {right} = comment.getBoundingClientRect()
 
-            if(right > 画面.right-30){
-                レーン[comment.laneNumber] = false
-            }
             if(right < 画面.left){
                 comment.remove()
+            }
+            else if(right > 画面.right-20){
+                レーン[comment.laneNumber] = false
             }
         }
 
@@ -204,7 +199,7 @@ class jsplayer extends HTMLElement{
 
 
     コメント投稿(){
-        const text = this.$コメント入力.value.trim()
+        const text = this.$コメント入力.value.trim().substring(0,50)
 
         if(text === '' || !this.post || !this.$動画.readyState){
             return
