@@ -94,12 +94,6 @@ class jsplayer extends HTMLElement{
     }
 
 
-    コメント遅延(time, duration){
-        const delay = time - duration
-        return (delay > 0) ? `${delay.toFixed(3)*1000}ms` : '0ms'
-    }
-
-
     コメント設定取得(画面高さ){
         let レーン数, レーン高さ, 文字サイズ, マージン
 
@@ -120,30 +114,15 @@ class jsplayer extends HTMLElement{
     }
 
 
-    コメント描画(data, レーン番号){
-        const el = document.createElement('div')
-
-        el.textContent          = data[0]
-        el.className            = 'コメント'
-        el.laneNumber           = レーン番号
-        el.style.top            = レーン番号 * this.コメント設定.レーン高さ + this.コメント設定.マージン + 'px'
-        el.style.fontSize       = this.コメント設定.文字サイズ + 'px'
-        el.style.animationName  = 'comment-anime'
-        el.style.animationDelay = this.コメント遅延(data[1], this.$動画.currentTime)
-
-        return el
-    }
-
-
     コメント放流(comments = []){
         let n = 0
 
         for(const [i, v] of this.コメントレーン().entries()){
             if(!comments[n]){
-                break
+                return
             }
             else if(v){
-                this.$画面.append(this.コメント描画(comments[n++], i))
+                this.コメント描画(comments[n++], i)
             }
         }
     }
@@ -165,6 +144,27 @@ class jsplayer extends HTMLElement{
         }
 
         return レーン
+    }
+
+
+    コメント描画(data, レーン番号){
+        const el = document.createElement('div')
+
+        el.textContent          = data[0]
+        el.className            = 'コメント'
+        el.laneNumber           = レーン番号
+        el.style.top            = レーン番号 * this.コメント設定.レーン高さ + this.コメント設定.マージン + 'px'
+        el.style.fontSize       = this.コメント設定.文字サイズ + 'px'
+        el.style.animationName  = 'comment-anime'
+        el.style.animationDelay = this.コメント遅延(data[1], this.$動画.currentTime)
+
+        this.$画面.append(el)
+    }
+
+
+    コメント遅延(time, duration){
+        const delay = time - duration
+        return (delay > 0) ? `${delay.toFixed(3)*1000}ms` : '0ms'
     }
 
 
