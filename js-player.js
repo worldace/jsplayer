@@ -135,26 +135,20 @@ class jsplayer extends HTMLElement{
     }
 
 
-    コメント放流(comment = []){
-        if(!comment.length){
-            return
-        }
-
-        const fragment = document.createDocumentFragment()
-        let   n        = 0
+    コメント放流(comments = []){
+        let n = 0
 
         for(const [i, v] of this.コメントレーン().entries()){
-            if(!comment[n]){
+            if(!comments[n]){
                 break
             }
             if(v === false){
                 continue
             }
-            fragment.append(this.コメント描画(comment[n], i))
+
+            this.$画面.append(this.コメント描画(comments[n], i))
             n++
         }
-
-        this.$画面.prepend(fragment)
     }
 
 
