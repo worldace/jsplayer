@@ -110,12 +110,11 @@ class jsplayer extends HTMLElement{
             マージン   = 5
         }
 
-        return {レーン数, レーン高さ, 文字サイズ, マージン}
+        return {レーン数, レーン高さ, 文字サイズ, マージン, レーン:this.range(レーン数)}
     }
 
 
     コメント放流(comments = []){
-
         for(const [i, v] of this.コメントレーン().entries()){
             if(!comments[i]){
                 return
@@ -126,7 +125,7 @@ class jsplayer extends HTMLElement{
 
 
     コメントレーン(){
-        const レーン = new Set(Array(this.コメント設定.レーン数).keys())
+        const レーン = new Set(this.コメント設定.レーン)
         const 画面   = this.$画面.getBoundingClientRect()
 
         for(const comment of this.$画面.querySelectorAll('.コメント')){
@@ -559,6 +558,11 @@ class jsplayer extends HTMLElement{
 
     csslen(el, property){
         return parseInt(getComputedStyle(el).getPropertyValue(property), 10) || 0
+    }
+
+
+    range(size, start = 0){
+        return [...Array(size).keys()].map(i => i + start)
     }
 
 
