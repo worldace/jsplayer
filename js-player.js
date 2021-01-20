@@ -142,12 +142,9 @@ class jsplayer extends HTMLElement{
             if(!comments[n]){
                 break
             }
-            if(v === false){
-                continue
+            else if(v){
+                this.$画面.append(this.コメント描画(comments[n++], i))
             }
-
-            this.$画面.append(this.コメント描画(comments[n], i))
-            n++
         }
     }
 
