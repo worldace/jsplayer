@@ -544,15 +544,7 @@ class jsplayer extends HTMLElement{
 
 
     limit(min, val, max){
-        if(val < min){
-            return min
-        }
-        else if(val > max){
-            return max
-        }
-        else{
-            return val
-        }
+        return Math.min(Math.max(min, val), max)
     }
 
 
