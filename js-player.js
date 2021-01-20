@@ -115,21 +115,18 @@ class jsplayer extends HTMLElement{
 
 
     コメント放流(comments = []){
-        let n = 0
 
         for(const [i, v] of this.コメントレーン().entries()){
-            if(!comments[n]){
+            if(!comments[i]){
                 return
             }
-            else if(v){
-                this.コメント描画(comments[n++], i)
-            }
+            this.コメント描画(comments[i], v)
         }
     }
 
 
     コメントレーン(){
-        const レーン = Array(this.コメント設定.レーン数).fill(true)
+        const レーン = new Set(Array(this.コメント設定.レーン数).keys())
         const 画面   = this.$画面.getBoundingClientRect()
 
         for(const comment of this.$画面.querySelectorAll('.コメント')){
@@ -139,7 +136,7 @@ class jsplayer extends HTMLElement{
                 comment.remove()
             }
             else if(right > 画面.right-20){
-                レーン[comment.laneNumber] = false
+                レーン.delete(comment.laneNumber)
             }
         }
 
