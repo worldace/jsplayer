@@ -25,185 +25,6 @@ class jsplayer extends HTMLElement{
     }
 
 
-    時間整形(time = 0){
-        const min = Math.floor(time / 60)
-        const sec = Math.floor(time - min * 60)
-
-        return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
-    }
-
-
-    時間変更(sec){
-        if(this.$動画.readyState){
-            this.$動画.currentTime = this.limit(0, Math.floor(sec), this.$動画.duration)
-        }
-    }
-
-
-    音量変更(vol){
-        this.$動画.volume = this.limit(0, vol.toFixed(1), 1)
-        this.$動画.muted  = false
-    }
-
-
-    再生速度変更(speed){
-        if(this.$動画.readyState){
-            this.$動画.playbackRate = this.limit(0.5, speed.toFixed(1), 3)
-        }
-    }
-
-
-    シークポインタ(current = 0){
-        return this.ポインタ(current, this.$シークポインタ)
-    }
-
-
-    音量ポインタ(current = 0){
-        return this.ポインタ(current, this.$音量ポインタ)
-    }
-
-
-    ポインタ(current, $ポインタ){ //currentは「割合(0-1)」「クリックされた位置」の2パターンある
-        const {width, left} = $ポインタ.parentNode.getBoundingClientRect()
-        const 横幅  = width - this.csslen($ポインタ, 'width')
-        const 位置  = (current <= 1) ? current*横幅 : current-left
-
-        return {'位置':this.limit(0, 位置, 横幅), '割合':this.limit(0, 位置/横幅, 1)}
-    }
-
-
-    シークバッファ表示(){
-        const buffer = this.$動画.buffered
-
-        for(let i = 0; i < buffer.length; i++){
-            if(buffer.end(i) > this.bufferMax){
-                this.bufferMax = buffer.end(i)
-                this.$シークバー.style.backgroundSize = `${this.bufferMax / this.$動画.duration * 100}% 100%`
-            }
-        }
-    }
-
-
-    OSD表示(str){
-        const osd          = document.createElement('div')
-        osd.textContent    = str
-        osd.id             = 'OSD'
-        osd.style.fontSize = `${this.コメント設定.文字サイズ}px`
-
-        this.$画面.querySelector('#OSD').replaceWith(osd)
-    }
-
-
-    コメント設定取得(画面高さ){
-        let レーン数, レーン高さ, 文字サイズ, マージン
-
-        if(画面高さ >= 360){
-            レーン数   = Math.floor((画面高さ-360)/180) + 10
-            レーン高さ = 画面高さ / レーン数 * 0.8
-            文字サイズ = レーン高さ / 6 * 5 //22.5px以上必要
-            マージン   = レーン高さ / 6
-        }
-        else{
-            レーン数   = Math.floor(画面高さ*0.8/30)
-            レーン高さ = 30
-            文字サイズ = 25
-            マージン   = 5
-        }
-
-        return {レーン数, レーン高さ, 文字サイズ, マージン, レーン:this.range(レーン数)}
-    }
-
-
-    コメント放流(comments = []){
-        for(const [i, v] of this.コメントレーン().entries()){
-            if(!comments[i]){
-                return
-            }
-            this.コメント描画(comments[i], v)
-        }
-    }
-
-
-    コメントレーン(){
-        const レーン = new Set(this.コメント設定.レーン)
-        const 画面   = this.$画面.getBoundingClientRect()
-
-        for(const comment of this.$画面.querySelectorAll('.コメント')){
-            const {right} = comment.getBoundingClientRect()
-
-            if(right < 画面.left){
-                comment.remove()
-            }
-            else if(right > 画面.right-20){
-                レーン.delete(comment.laneNumber)
-            }
-        }
-
-        return レーン
-    }
-
-
-    コメント描画(data, レーン番号){
-        const el = document.createElement('div')
-
-        el.textContent          = data[0]
-        el.className            = 'コメント'
-        el.laneNumber           = レーン番号
-        el.style.top            = レーン番号 * this.コメント設定.レーン高さ + this.コメント設定.マージン + 'px'
-        el.style.fontSize       = this.コメント設定.文字サイズ + 'px'
-        el.style.animationName  = 'comment-anime'
-        el.style.animationDelay = this.コメント遅延(data[1], this.$動画.currentTime)
-
-        this.$画面.append(el)
-    }
-
-
-    コメント遅延(time, duration){
-        const delay = time - duration
-        return (delay > 0) ? `${delay.toFixed(3)*1000}ms` : '0ms'
-    }
-
-
-    コメント全消去(){
-        for(const comment of this.$画面.querySelectorAll('.コメント')){
-            comment.remove()
-        }
-    }
-
-
-    コメント取得(){
-        if(this.コメント || !this.comment){
-            return
-        }
-
-        this.コメント = Array(Math.floor(this.$動画.duration+1)).fill().map(v => [])
-
-        for(const v of JSON.parse(this.comment)){
-            const n = Math.floor(v[1]/100)
-            this.コメント[n]?.push([v[0].substring(0,50), v[1]/100])
-        }
-    }
-
-
-    コメント投稿(){
-        const text = this.$コメント入力.value.trim().substring(0,50)
-
-        if(text === '' || !this.post || !this.$動画.readyState){
-            return
-        }
-
-        const time = this.$動画.currentTime
-        const sec  = Math.floor(time)
-        const body = new URLSearchParams({text, vpos:time.toFixed(2).replace('.',''), file:this.$動画.src})
-
-        fetch(this.post, {method:'POST', body})
-
-        this.コメント[sec+1]?.unshift([text, time+1])
-
-        this.$コメント入力.value = ''
-    }
-
-
 
     $動画_click(event){
         if(!this.$動画.currentTime){
@@ -408,7 +229,7 @@ class jsplayer extends HTMLElement{
     }
 
 
-    $jsplayer_keydown(event){
+    $_keydown(event){
         this.$コントローラ.style.visibility = 'visible'
 
         if(event.target.tagName === 'INPUT'){
@@ -539,6 +360,192 @@ class jsplayer extends HTMLElement{
         clearTimeout(this.timer)
         this.timer = setTimeout(() => this.$画面.style.cursor = 'none', 2500)
         this.$画面.style.cursor = 'auto'
+    }
+
+
+
+
+
+    時間整形(time = 0){
+        const min = Math.floor(time / 60)
+        const sec = Math.floor(time - min * 60)
+
+        return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+    }
+
+
+    時間変更(sec){
+        if(this.$動画.readyState){
+            this.$動画.currentTime = this.limit(0, Math.floor(sec), this.$動画.duration)
+        }
+    }
+
+
+    音量変更(vol){
+        this.$動画.volume = this.limit(0, vol.toFixed(1), 1)
+        this.$動画.muted  = false
+    }
+
+
+    再生速度変更(speed){
+        if(this.$動画.readyState){
+            this.$動画.playbackRate = this.limit(0.5, speed.toFixed(1), 3)
+        }
+    }
+
+
+    シークポインタ(current = 0){
+        return this.ポインタ(current, this.$シークポインタ)
+    }
+
+
+    音量ポインタ(current = 0){
+        return this.ポインタ(current, this.$音量ポインタ)
+    }
+
+
+    ポインタ(current, $ポインタ){ //currentは「割合(0-1)」「クリックされた位置」の2パターンある
+        const {width, left} = $ポインタ.parentNode.getBoundingClientRect()
+        const 横幅  = width - this.csslen($ポインタ, 'width')
+        const 位置  = (current <= 1) ? current*横幅 : current-left
+
+        return {'位置':this.limit(0, 位置, 横幅), '割合':this.limit(0, 位置/横幅, 1)}
+    }
+
+
+    シークバッファ表示(){
+        const buffer = this.$動画.buffered
+
+        for(let i = 0; i < buffer.length; i++){
+            if(buffer.end(i) > this.bufferMax){
+                this.bufferMax = buffer.end(i)
+                this.$シークバー.style.backgroundSize = `${this.bufferMax / this.$動画.duration * 100}% 100%`
+            }
+        }
+    }
+
+
+    OSD表示(str){
+        const osd          = document.createElement('div')
+        osd.textContent    = str
+        osd.id             = 'OSD'
+        osd.style.fontSize = `${this.コメント設定.文字サイズ}px`
+
+        this.$画面.querySelector('#OSD').replaceWith(osd)
+    }
+
+
+    コメント設定取得(画面高さ){
+        let レーン数, レーン高さ, 文字サイズ, マージン
+
+        if(画面高さ >= 360){
+            レーン数   = Math.floor((画面高さ-360)/180) + 10
+            レーン高さ = 画面高さ / レーン数 * 0.8
+            文字サイズ = レーン高さ / 6 * 5 //22.5px以上必要
+            マージン   = レーン高さ / 6
+        }
+        else{
+            レーン数   = Math.floor(画面高さ*0.8/30)
+            レーン高さ = 30
+            文字サイズ = 25
+            マージン   = 5
+        }
+
+        return {レーン数, レーン高さ, 文字サイズ, マージン, レーン:this.range(レーン数)}
+    }
+
+
+    コメント放流(comments = []){
+        for(const [i, v] of this.コメントレーン().entries()){
+            if(!comments[i]){
+                return
+            }
+            this.コメント描画(comments[i], v)
+        }
+    }
+
+
+    コメントレーン(){
+        const レーン = new Set(this.コメント設定.レーン)
+        const 画面   = this.$画面.getBoundingClientRect()
+
+        for(const comment of this.$画面.querySelectorAll('.コメント')){
+            const {right} = comment.getBoundingClientRect()
+
+            if(right < 画面.left){
+                comment.remove()
+            }
+            else if(right > 画面.right-20){
+                レーン.delete(comment.laneNumber)
+            }
+        }
+
+        return レーン
+    }
+
+
+    コメント描画(data, レーン番号){
+        const el = document.createElement('div')
+
+        el.textContent          = data[0]
+        el.className            = 'コメント'
+        el.laneNumber           = レーン番号
+        el.style.top            = レーン番号 * this.コメント設定.レーン高さ + this.コメント設定.マージン + 'px'
+        el.style.fontSize       = this.コメント設定.文字サイズ + 'px'
+        el.style.animationName  = 'comment-anime'
+        el.style.animationDelay = this.コメント遅延(data[1], this.$動画.currentTime)
+
+        this.$画面.append(el)
+    }
+
+
+    コメント遅延(time, duration){
+        const delay = time - duration
+        return (delay > 0) ? `${delay.toFixed(3)*1000}ms` : '0ms'
+    }
+
+
+    コメント全消去(){
+        for(const comment of this.$画面.querySelectorAll('.コメント')){
+            comment.remove()
+        }
+    }
+
+
+    コメント取得(){
+        if(this.コメント){
+            return
+        }
+
+        this.コメント = Array(Math.floor(this.$動画.duration+1)).fill().map(v => [])
+
+        if(!this.comment){
+            return
+        }
+
+        for(const v of JSON.parse(this.comment)){
+            const n = Math.floor(v[1]/100)
+            this.コメント[n]?.push([v[0].substring(0,50), v[1]/100])
+        }
+    }
+
+
+    コメント投稿(){
+        const text = this.$コメント入力.value.trim().substring(0,50)
+
+        if(text === '' || !this.post || !this.$動画.readyState){
+            return
+        }
+
+        const time = this.$動画.currentTime
+        const sec  = Math.floor(time)
+        const body = new URLSearchParams({text, vpos:time.toFixed(2).replace('.',''), file:this.$動画.src})
+
+        fetch(this.post, {method:'POST', body})
+
+        this.コメント[sec+1]?.unshift([text, time+1])
+
+        this.$コメント入力.value = ''
     }
 
 
