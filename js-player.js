@@ -133,8 +133,6 @@ class jsplayer extends HTMLElement{
         else{
             this.OSD表示('未知のエラーが発生しました')
         }
-
-        this.コメント全消去()
     }
 
 
