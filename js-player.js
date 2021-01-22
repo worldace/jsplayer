@@ -46,9 +46,8 @@ class jsplayer extends HTMLElement{
         this.$合計時間.textContent        = this.時間整形(this.$動画.duration)
 
         if(!this.コメント){
-            this.コメント = Array(Math.floor(this.$動画.duration+1)).fill().map(v => [])
+            this.コメント = this.コメント取得(Math.floor(this.$動画.duration+1))
         }
-        this.コメント取得()
     }
 
 
@@ -516,15 +515,15 @@ class jsplayer extends HTMLElement{
     }
 
 
-    コメント取得(){
-        if(!this.comment){
-            return
+    コメント取得(length){
+        const comments = Array(length).fill().map(v => [])
+
+        for(const v of JSON.parse(this.comment || '[]')){
+            const n = Math.floor(v[1]/100)
+            comments[n]?.push([v[0].substring(0,50), v[1]/100])
         }
 
-        for(const v of JSON.parse(this.comment)){
-            const n = Math.floor(v[1]/100)
-            this.コメント[n]?.push([v[0].substring(0,50), v[1]/100])
-        }
+        return comments
     }
 
 
