@@ -44,6 +44,10 @@ class jsplayer extends HTMLElement{
         this.$コメント入力.disabled       = false
         this.$コメント投稿ボタン.disabled = false
         this.$合計時間.textContent        = this.時間整形(this.$動画.duration)
+
+        if(!this.コメント){
+            this.コメント = Array(Math.floor(this.$動画.duration+1)).fill().map(v => [])
+        }
         this.コメント取得()
     }
 
@@ -513,12 +517,6 @@ class jsplayer extends HTMLElement{
 
 
     コメント取得(){
-        if(this.コメント){
-            return
-        }
-
-        this.コメント = Array(Math.floor(this.$動画.duration+1)).fill().map(v => [])
-
         if(!this.comment){
             return
         }
