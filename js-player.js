@@ -493,7 +493,6 @@ class jsplayer extends HTMLElement{
         el.laneNumber           = レーン番号
         el.style.top            = レーン番号 * this.コメント設定.レーン高さ + this.コメント設定.マージン + 'px'
         el.style.fontSize       = this.コメント設定.文字サイズ + 'px'
-        el.style.animationName  = 'comment-anime'
         el.style.animationDelay = this.コメント遅延(data[1], this.$動画.currentTime)
 
         this.$画面.append(el)
@@ -556,7 +555,8 @@ class jsplayer extends HTMLElement{
 
 
     range(size, start = 0){
-        return [...Array(size).keys()].map(i => i + start)
+        const list = [...Array(size).keys()]
+        return start ? list.map(i => i + start) : list
     }
 
 
@@ -831,6 +831,7 @@ class jsplayer extends HTMLElement{
             z-index: 2;
             color: #fff;
             text-shadow: -1px -1px #333, 1px -1px #333, -1px 1px #333, 1px 1px #333;
+            animation-name: コメントアニメ;
             animation-fill-mode: forwards;
             animation-timing-function: linear;
             animation-duration: 34s;
@@ -841,7 +842,7 @@ class jsplayer extends HTMLElement{
             animation-play-state: paused;
         }
 
-        @keyframes comment-anime{
+        @keyframes コメントアニメ{
             from{
                 transform:translateX(0);
             }
