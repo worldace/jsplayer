@@ -864,10 +864,10 @@ function benry(self){ // https://qiita.com/economist/items/6c923c255f6b4b7bbf84
         if(typeof self[name] !== 'function'){
             continue
         }
-        self[name] = self[name].bind(self)
-        const [$id, event] = name.split(/_([^_]*?)$/)
-        if($id.startsWith('$') && self[$id] && event){
-            self[$id].addEventListener(event, self[name])
+        self[name]  = self[name].bind(self)
+        const match = name.match(/^(\$[^_]*)_([^_]+)$/)
+        if(match && self[match[1]]){
+            self[match[1]].addEventListener(match[2], self[name])
         }
     }
 }
