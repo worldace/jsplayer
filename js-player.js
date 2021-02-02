@@ -562,42 +562,7 @@ class jsplayer extends HTMLElement{
 
     get html(){
         return `
-        <div id="jsplayer" data-pause>
-          <div id="画面" tabindex="1">
-            <div id="OSD"></div>
-            <video id="動画" loop></video>
-          </div>
-          <div id="コントローラ">
-            <div id="コントローラ枠">
-              <div id="再生ボタン"></div>
-              <div id="現在時間">00:00</div>
-              <div id="シーク枠">
-                <div id="シークバー">
-                  <div id="シークポインタ"></div>
-                </div>
-              </div>
-              <div id="合計時間">00:00</div>
-              <div id="音量ボタン"></div>
-              <div id="音量枠">
-                <div id="音量バー">
-                  <div id="音量ポインタ"></div>
-                </div>
-              </div>
-              <div id="コメント表示ボタン"></div>
-              <div id="全画面ボタン"></div>
-            </div>
-            <form id="フォーム枠" action="javascript:void(0)">
-              <input id="コメント入力" type="text" value="" autocomplete="off" spellcheck="false" maxlength="50" tabindex="2" disabled>
-              <input id="コメント投稿ボタン" type="submit" value="コメントする" disabled>
-            </form>
-          </div>
-        </div>
-        `
-    }
-
-
-    get css(){
-        return `
+        <style>
         #jsplayer{
             --画面初期幅: 960px;
             --画面初期高さ: 540px;
@@ -850,6 +815,37 @@ class jsplayer extends HTMLElement{
                 transform:translateX(calc(-10 * var(--画面幅)));
             }
         }
+        </style>
+        <div id="jsplayer" data-pause>
+          <div id="画面" tabindex="1">
+            <div id="OSD"></div>
+            <video id="動画" loop></video>
+          </div>
+          <div id="コントローラ">
+            <div id="コントローラ枠">
+              <div id="再生ボタン"></div>
+              <div id="現在時間">00:00</div>
+              <div id="シーク枠">
+                <div id="シークバー">
+                  <div id="シークポインタ"></div>
+                </div>
+              </div>
+              <div id="合計時間">00:00</div>
+              <div id="音量ボタン"></div>
+              <div id="音量枠">
+                <div id="音量バー">
+                  <div id="音量ポインタ"></div>
+                </div>
+              </div>
+              <div id="コメント表示ボタン"></div>
+              <div id="全画面ボタン"></div>
+            </div>
+            <form id="フォーム枠" action="javascript:void(0)">
+              <input id="コメント入力" type="text" value="" autocomplete="off" spellcheck="false" maxlength="50" tabindex="2" disabled>
+              <input id="コメント投稿ボタン" type="submit" value="コメントする" disabled>
+            </form>
+          </div>
+        </div>
         `
     }
 }
@@ -858,26 +854,19 @@ class jsplayer extends HTMLElement{
 
 function benry(self){ // https://qiita.com/economist/items/6c923c255f6b4b7bbf84
     self.$ = self.attachShadow({mode:'open'})
-    self.$.innerHTML = `<style id="css">${self.css || ''}</style>${self.html || ''}`
+    self.$.innerHTML = self.html || ''
 
     for(const el of self.$.querySelectorAll('[id]')){
         self[`$${el.id}`] = el
     }
 
     for(const name of Object.getOwnPropertyNames(self.constructor.prototype)){
-        if(name.endsWith('_event')){ // 追加コード
-            self[name] = self.constructor.prototype[name].bind(self)
+        if(typeof self[name] !== 'function'){
             continue
         }
-
-        if(!name.startsWith('$')){
-            continue
-        }
-
+        self[name] = self[name].bind(self)
         const [$id, event] = name.split(/_([^_]*?)$/)
-
-        if(self[$id] && event){
-            self[name] = self.constructor.prototype[name].bind(self)
+        if($id.startsWith('$') && self[$id] && event){
             self[$id].addEventListener(event, self[name])
         }
     }
