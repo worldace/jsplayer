@@ -4,7 +4,7 @@
 class jsplayer extends HTMLElement{
 
     connectedCallback(){
-        benry(this)
+        benry(this, ['file','comment','post'])
 
         this.$画面.初期幅   = this.csslen(this.$jsplayer, '--画面初期幅')
         this.$画面.初期高さ = this.csslen(this.$jsplayer, '--画面初期高さ')
@@ -13,17 +13,6 @@ class jsplayer extends HTMLElement{
         this.$動画.src    = this.file
         this.$画面.focus()
     }
-
-
-    static get observedAttributes(){
-        return ['file', 'comment', 'post']
-    }
-
-
-    attributeChangedCallback(name, oldValue, newValue){
-        this[name] = newValue
-    }
-
 
 
     $動画_click(event){
@@ -852,7 +841,7 @@ class jsplayer extends HTMLElement{
 
 
 
-function benry(self){ // https://qiita.com/economist/items/6c923c255f6b4b7bbf84
+function benry(self, attr = []){ // https://qiita.com/economist/items/6c923c255f6b4b7bbf84
     self.$ = self.attachShadow({mode:'open'})
     self.$.innerHTML = self.html || ''
 
@@ -869,6 +858,10 @@ function benry(self){ // https://qiita.com/economist/items/6c923c255f6b4b7bbf84
         if(match && self[match[1]]){
             self[match[1]].addEventListener(match[2], self[name])
         }
+    }
+
+    for(const name of attr){
+        self[name] = self.getAttribute(name)
     }
 }
 
