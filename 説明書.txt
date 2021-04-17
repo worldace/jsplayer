@@ -10,9 +10,10 @@
     https://github.com/worldace/jsplayer/archive/master.zip
 
 
-2.  スクリプトを読み込むタグを記述する。scriptタグはどこに記述してもOKですが、type属性が必要です
+2.  スクリプトを読み込むタグを記述する。
+    defer属性を付けると、タグをどこにでも記述できます。(モジュールとしても読み込み可)
 
-    <script src="js-player.js" type="module"></script>
+    <script src="js-player.js" defer></script>
 
 
 3.  js-playerタグを記述するとプレイヤーが表示されます。閉じタグは必須です

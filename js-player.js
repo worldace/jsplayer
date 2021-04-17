@@ -1,5 +1,3 @@
-// benry EventTarget
-// maxlength
 
 class jsplayer extends HTMLElement{
 
