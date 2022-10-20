@@ -40,15 +40,14 @@ class jsplayer extends HTMLElement{
 
 
     $video_timeupdate(event){
-        const current = this.$video.currentTime
-        const sec     = Math.floor(current)
+        const sec = Math.floor(this.$video.currentTime)
 
         if(sec === this.lastUpdate){
             return
         }
         this.lastUpdate = sec
 
-        this.timeRender(current)
+        this.timeRender(this.$video.currentTime)
 
         if(this.$jsplayer.dataset.commentOff === 'false' && this.comments[sec]){
             this.commentRender(this.comments[sec])
@@ -381,8 +380,7 @@ class jsplayer extends HTMLElement{
 
 
     commentPrepare(){
-        const length   = Math.floor(this.$video.duration + 60)
-        const comments = Array(length).fill().map(v => [])
+        const comments = Array( Math.floor(this.$video.duration+60) ).fill().map(v => [])
 
         if(this.comment){
             for(const [text, vpos] of JSON.parse(this.comment)){

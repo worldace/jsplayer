@@ -40,10 +40,19 @@ $コメントJSON = htmlspecialchars(json_encode($コメント一覧));
 ■<js-player>タグの属性一覧
 
 file    : 動画ファイルのURL
-comment : コメントJSON
 post    : コメント投稿先URL
+comment : コメントJSON
 width   : 画面の横幅。省略時は960
 height  : 画面の縦幅。省略時は540
+
+
+
+■2022年版の変更点
+・コメント流量が少なかった問題の改善
+・コメントが流れ終えたら確実に消えるように改善
+・コメントを投稿したら、そのコメントを即座に流し始めるように改善
+・シーク動作の改善
+・width属性とheight属性の追加
 
 
 
