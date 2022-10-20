@@ -48,6 +48,7 @@ height  : 画面の縦幅。省略時は540
 
 
 ■2022年版の変更点
+
 ・コメント流量が少なかった問題の改善
 ・コメントが流れ終えたら確実に消えるように改善
 ・コメントを投稿したら、そのコメントを即座に流し始めるように改善
@@ -68,7 +69,6 @@ $group_id : ひま動のgroup_id。 動画ページのソースを「name="group
 $key      : ひま動のkey。動画ページのソースを「name="key"」で検索して、そのvalue値
 
 function himado_get($id, $group_id, $key){
-    $comment = [];
 
     $url = 'http://himado.in/?' . http_build_query([
         'id'       => $id,
@@ -86,8 +86,9 @@ function himado_get($id, $group_id, $key){
         return;
     }
 
+    $comment = [];
     foreach(simplexml_load_string($xml) as $v){
-        $comment[] = [(string)$v, (int)$v['vpos']];
+        array_push($comment, [(string)$v, (int)$v['vpos']]);
     }
 
     return htmlspecialchars(json_encode($comment));
