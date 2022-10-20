@@ -1,90 +1,58 @@
-■jsplayer 2021年版
+■jsplayer 2022年版
 
-コメントを流せる動画プレイヤー。JavaScript製
+コメントを流せるJavaScript動画プレイヤー
+
 
 
 ■設置方法
 
-
-1.  プログラムをダウンロードしたら、js-player.js をアップします
-    https://github.com/worldace/jsplayer/archive/master.zip
-
-
-2.  スクリプトを読み込むタグを記述する。
-    defer属性を付けると、タグをどこにでも記述できます。(モジュールとしても読み込み可)
-
-    <script src="js-player.js" defer></script>
-
-
-3.  js-playerタグを記述するとプレイヤーが表示されます。閉じタグは必須です
-    file属性に動画ファイルのURLを指定してください。
-
-   <js-player file="動画ファイルのURL"></js-player>
-
-
-
-■2021年版と旧版との違い
-
-
-- IE非対応
-- 設置方法が変更
-- コメント入出力の仕様が変更
-- ひま動のコメントを直接扱わなくなった
-
-
-旧版のダウンロード
-https://github.com/worldace/jsplayer/archive/6b4b8de07ae8beeeeea3978bf93635daa1970ae5.zip
+1. プログラムをダウンロード。 https://github.com/worldace/jsplayer/archive/master.zip
+2. <script>タグでプログラムを読み込む。<script src="js-player.js"></script> ※モジュールとしても読み込み可
+3. <js-player>タグを記述し、file属性に動画のURLを指定する。<js-player file="動画URL"></js-player>
 
 
 
 ■コメント機能
 
-コメントを使う場合は、コメントの入出力機能を自作する必要があります。
-プログラミングの知識が必要です。
+コメント機能を使うには、サーバー側のプログラムを自作する必要があります
 
 
-★コメントの書き込み
+★書き込み処理の作り方
+<js-player file=".." post="投稿先URL"></js-player>
 
-1. js-playerタグのpost属性にコメント投稿先のURLを入力する
+次のデータが投稿先URLにPOSTされます
 
-<js-player post="コメント投稿先URL" file="..">
-
-
-2. コメントはそのURLに対してPOSTされ、次の3つのキーが送信されます。
-
----------------------------------------------------------------------------------------------------
-text   : コメント本文
----------------------------------------------------------------------------------------------------
-vpos   : コメントが投稿された動画内時間(小数点第三位を四捨五入して100倍した整数)
----------------------------------------------------------------------------------------------------
-file   : 動画ファイルのURL(file属性の値)
----------------------------------------------------------------------------------------------------
+text : コメント本文
+vpos : コメントが投稿された動画内の秒(小数点第三位を四捨五入して100倍した整数)
+file : 動画ファイルのURL
 
 
-★コメントの読み込み
+★読み込み処理の作り方
+<js-player file=".." comment="コメントJSON"></js-player>
 
-1. js-playerタグのcomment属性に「コメント一覧をエンコードした文字列」を入力する
+コメントJSONの作り方は、次のPHPコードを参考にしてください。
 
-<js-player comment="エンコード済みの文字列" file="..">
-
-※コメント一覧のデータ構造とエンコード方法は、次のPHPコードを参考にしてください
-
-$コメント一覧   = [[本文,時間],[本文,時間],[本文,時間]]; //新しい順
-$エンコード済み = htmlspecialchars(json_encode($コメント一覧));
+$コメント一覧 = [[text,vpos],[text,vpos],[text,vpos]]; //投稿日時が新しい順を推奨
+$コメントJSON = htmlspecialchars(json_encode($コメント一覧));
 
 
 
+■<js-player>タグの属性一覧
 
-■ひま動
+file    : 動画ファイルのURL
+comment : コメントJSON
+post    : コメント投稿先URL
+width   : 画面の横幅。省略時は960
+height  : 画面の縦幅。省略時は540
 
-jsplayerはひま動のコメントを扱わなくなりました。
 
-ひま動からコメントを取得したい場合は、各自で取得してjsplayerに渡してください。
-ひま動へコメント投稿したい場合は、jsplayerからの投稿を各自で再投稿してください。
 
-PHPのサンプルコードを用意したので、参考に各自実装してください。
+■ひまわり動画
 
------------------------------------------
+ひまわり動画をコメントサーバーとして利用する例を紹介
+
+
+★コメントの取得関数
 
 $id       : ひま動の動画ID。動画ページのURLに含まれる文字
 $group_id : ひま動のgroup_id。 動画ページのソースを「name="group_id"」で検索して、そのvalue値
@@ -117,9 +85,12 @@ function himado_get($id, $group_id, $key){
 }
 
 
+★コメントの投稿関数
 
-$text : jsplayerが送信したPOSTのtext
-$vpos : jsplayerが送信したPOSTのvpos
+$id       : ひま動の動画ID。動画ページのURLに含まれる文字
+$group_id : ひま動のgroup_id。 動画ページのソースを「name="group_id"」で検索して、そのvalue値
+$text     : jsplayerが送信したtext
+$vpos     : jsplayerが送信したvpos
 
 function himado_post($id, $group_id, $text, $vpos){
     $url = 'http://himado.in/api/player?' . http_build_query([
