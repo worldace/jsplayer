@@ -1,5 +1,5 @@
 
-class jsplayer extends HTMLElement{
+class JSPlayer extends HTMLElement{
 
     connectedCallback(){
         benry(this)
@@ -397,7 +397,7 @@ class jsplayer extends HTMLElement{
             if(!comments[i]){
                 return
             }
-            this.$screen.append( this.commentCreate(comments[i][0], comments[i][1], v) )
+            this.$screen.append( this.commentElement(comments[i][0], comments[i][1], v) )
         }
     }
 
@@ -421,7 +421,7 @@ class jsplayer extends HTMLElement{
     }
 
 
-    commentCreate(text, time, laneNumber){
+    commentElement(text, time, laneNumber){
         const el = document.createElement('div')
 
         el.textContent          = text
@@ -752,4 +752,4 @@ function benry(self){ // https://qiita.com/economist/items/6c923c255f6b4b7bbf84
 }
 
 
-customElements.define('js-player', jsplayer)
+customElements.define('js-player', JSPlayer)
