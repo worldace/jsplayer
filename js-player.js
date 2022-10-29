@@ -11,8 +11,8 @@ class JSPlayer extends HTMLElement{
         this.comment = this.getAttribute('comment')
         this.config  = this.commentConfig(this.height)
 
-        this.$jsplayer.style.setProperty('--width',  this.width  + 'px')
-        this.$jsplayer.style.setProperty('--height', this.height + 'px')
+        this.style.setProperty('--width',  this.width  + 'px')
+        this.style.setProperty('--height', this.height + 'px')
 
         this.$video.src = this.file
         this.$screen.focus()
@@ -259,7 +259,7 @@ class JSPlayer extends HTMLElement{
             this.$screen.style.cursor = 'none'
             this.$controller.style.visibility = 'hidden'
 
-            this.$jsplayer.style.setProperty('--screen-width', `${screen.width}px`)
+            this.style.setProperty('--screen-width', `${screen.width}px`)
 
             this.config = this.commentConfig(screen.height)
             this.commentClear()
@@ -275,7 +275,7 @@ class JSPlayer extends HTMLElement{
             this.$screen.style.cursor = 'auto'
             this.$controller.style.visibility = 'visible'
 
-            this.$jsplayer.style.setProperty('--screen-width', `${this.width}px`)
+            this.style.setProperty('--screen-width', `${this.width}px`)
 
             this.config = this.commentConfig(this.height)
             this.commentClear()
@@ -491,12 +491,12 @@ class JSPlayer extends HTMLElement{
 
     css(){
         return `
-#jsplayer{
+:host{
     --width: 960px;
     --height: 540px;
     --screen-width: var(--width);
 }
-#jsplayer *{
+*{
     box-sizing: border-box;
 }
 #video{
