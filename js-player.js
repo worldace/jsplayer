@@ -375,12 +375,12 @@ class JSPlayer extends HTMLElement{
         const fontSize   = laneHeight / 6 * 5
         const margin     = laneHeight / 6
 
-        return {laneCount, laneHeight, fontSize, margin, lane:[...Array(laneCount).keys()]}
+        return {laneCount, laneHeight, fontSize, margin, lane:Array.from({length:laneCount}, (_,i) => i)}
     }
 
 
     commentPrepare(){
-        const comments = Array( Math.floor(this.$video.duration+60) ).fill().map(v => [])
+        const comments = Array.from({length:Math.floor(this.$video.duration+60)}, _ => [])
 
         if(this.comment){
             for(const [text, vpos] of JSON.parse(this.comment)){
